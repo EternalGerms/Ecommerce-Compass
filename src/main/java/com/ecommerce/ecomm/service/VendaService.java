@@ -28,7 +28,7 @@ public class VendaService {
             .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
         
         if (produto.getEstoque() < vendaDTO.getQuantidade()) {
-            throw new IllegalArgumentException("Estoque insuficiente para o produto: " + produto.getNome());
+            throw new IllegalArgumentException("Estoque insuficiente para o produto: " + produto.getNome() + " ID: " + produto.getId());
         }
         
         produto.setEstoque(produto.getEstoque() - vendaDTO.getQuantidade());
