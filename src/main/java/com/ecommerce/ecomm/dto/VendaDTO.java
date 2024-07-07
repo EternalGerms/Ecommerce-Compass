@@ -3,6 +3,7 @@ package com.ecommerce.ecomm.dto;
 import java.time.LocalDate;
 
 public class VendaDTO {
+	private Long id;
     private Long idProduto;
     private Integer quantidade;
     private LocalDate dataVenda;
@@ -27,6 +28,14 @@ public class VendaDTO {
 	}
 	public void setDataVenda(LocalDate dataVenda) {
 		this.dataVenda = dataVenda;
+		
+	}
+	
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
 	}
 	public VendaDTO(Long idProduto, Integer quantidade, LocalDate dataVenda) {
 		this.idProduto = idProduto;

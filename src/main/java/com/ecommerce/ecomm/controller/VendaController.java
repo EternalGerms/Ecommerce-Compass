@@ -26,9 +26,13 @@ public class VendaController {
     private VendaService vendaService;
 
     @PostMapping
-    public ResponseEntity<Venda> criarVenda(@RequestBody VendaDTO vendaDTO) {
-        Venda venda = vendaService.criarVenda(vendaDTO);
-        return new ResponseEntity<>(venda, HttpStatus.CREATED);
+    public ResponseEntity<?> criarVenda(@RequestBody VendaDTO vendaDTO) {
+        try {
+            Venda venda = vendaService.criarVenda(vendaDTO);
+            return new ResponseEntity<>(venda, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping

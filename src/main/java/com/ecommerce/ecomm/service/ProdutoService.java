@@ -36,6 +36,10 @@ public class ProdutoService {
 		if (produto.getPreco().compareTo(BigDecimal.ZERO) <= 0) {
 			throw new IllegalArgumentException("Preço do produto deve ser positivo");
 		}
+		if (produto.getEstoque() < 0) {
+            throw new IllegalArgumentException("O estoque não pode ser negativo");
+        }
+		
 		return produtoRepository.save(produto);
 	}
 

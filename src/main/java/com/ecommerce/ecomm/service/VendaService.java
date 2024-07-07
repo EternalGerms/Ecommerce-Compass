@@ -26,11 +26,19 @@ public class VendaService {
     public Venda criarVenda(VendaDTO vendaDTO) {
         Produto produto = produtoRepository.findById(vendaDTO.getIdProduto())
             .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
+        
+        if (produto.getEstoque() < vendaDTO.getQuantidade()) {
+            throw new IllegalArgumentException("Estoque insuficiente para o produto: " + produto.getNome());
+        }
+        
+        produto.setEstoque(produto.getEstoque() - vendaDTO.getQuantidade());
+        produtoRepository.save(produto);
 
         Venda venda = new Venda();
         venda.setProduto(produto);
         venda.setQuantidade(vendaDTO.getQuantidade());
         venda.setDataVenda(vendaDTO.getDataVenda());
+        venda.setIdProduto(produto.getId());
 
         return vendaRepository.save(venda);
     }
