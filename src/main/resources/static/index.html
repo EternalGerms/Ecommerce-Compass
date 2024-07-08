@@ -22,7 +22,7 @@
                     <th onclick="sortProducts('estoque')">Estoque</th>
                     <th onclick="sortProducts('preco')">Preço</th>
                     <th>Ativo</th>
-                    <th></th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody id="productList">
@@ -70,14 +70,14 @@
         <table id="salesTable">
             <thead>
                 <tr>
-                    <th onclick="sortSales('id')">ID</th>
-                    <th onclick="sortSales('idProduto')">ID do Produto</th>
-                    <th onclick="sortSales('quantidade')">Quantidade</th>
-                    <th onclick="sortSales('dataVenda')">Data da Venda</th>
+                    <th onclick="sortVendas('id')">ID</th>
+                    <th onclick="sortVendas('id-produto')">ID do Produto</th>
+                    <th onclick="sortVendas('quantidade')">Quantidade</th>
+                    <th onclick="sortVendas('dataVenda')">Data da Venda</th>
                     <th></th> <!-- Coluna vazia para os botões -->
                 </tr>
             </thead>
-            <tbody id="salesList">
+            <tbody id="vendaList">
                 <!-- Linhas da tabela serão adicionadas dinamicamente aqui -->
             </tbody>
         </table>

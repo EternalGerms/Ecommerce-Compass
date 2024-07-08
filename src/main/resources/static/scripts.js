@@ -42,7 +42,7 @@ function loadProducts() {
         if (data.length === 0) {
             const noDataRow = document.createElement('tr');
             const noDataCell = document.createElement('td');
-            noDataCell.colSpan = 4; // Colspan para ocupar todas as colunas da tabela
+            noDataCell.colSpan = 6; // Colspan para ocupar todas as colunas da tabela
             noDataCell.innerText = 'Nenhum produto encontrado.';
             noDataRow.appendChild(noDataCell);
             productList.appendChild(noDataRow);
@@ -82,6 +82,25 @@ function loadProducts() {
                 estoqueCell.innerText = product.estoque;
                 row.appendChild(estoqueCell);
 
+                // Coluna Ativo
+                const ativoCell = document.createElement('td');
+                ativoCell.innerText = product.ativo ? 'Sim' : 'Não';
+                row.appendChild(ativoCell);
+
+                // Coluna Ações
+                const acoesCell = document.createElement('td');
+                const editButton = document.createElement('button');
+                editButton.innerText = 'Editar';
+                editButton.addEventListener('click', () => editProduct(product));
+                acoesCell.appendChild(editButton);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.innerText = 'Excluir';
+                deleteButton.addEventListener('click', () => deleteProduct(product.id));
+                acoesCell.appendChild(deleteButton);
+
+                row.appendChild(acoesCell);
+
                 productList.appendChild(row);
             });
         }
@@ -92,11 +111,35 @@ function loadProducts() {
         productList.innerHTML = ''; // Limpa a lista em caso de erro
         const errorRow = document.createElement('tr');
         const errorCell = document.createElement('td');
-        errorCell.colSpan = 4;
+        errorCell.colSpan = 6;
         errorCell.innerText = 'Erro ao carregar produtos: ' + error.message;
         errorRow.appendChild(errorCell);
         productList.appendChild(errorRow);
     });
+}
+
+function editProduct(product) {
+    document.getElementById('editProductId').value = product.id;
+    document.getElementById('editProductName').value = product.nome;
+    document.getElementById('editProductStock').value = product.estoque;
+    document.getElementById('editProductPrice').value = product.preco;
+}
+
+function deleteProduct(productId) {
+    if (confirm('Tem certeza que deseja excluir este produto?')) {
+        fetch(`/api/produtos/${productId}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(error => { throw new Error(error.message || 'Erro ao excluir produto'); });
+            }
+            loadProducts(); // Refresh the product list after deleting a product
+        })
+        .catch(error => {
+            alert('Erro ao excluir produto: ' + error.message);
+        });
+    }
 }
 
 // Função para carregar vendas
@@ -112,6 +155,10 @@ function loadVendas() {
     .then(data => {
         console.log('Dados de vendas recebidos:', data); // Log para depuração
         const vendaList = document.getElementById('vendaList');
+        if (!vendaList) {
+            console.error('Elemento vendaList não encontrado no DOM');
+            return;
+        }
         vendaList.innerHTML = ''; // Limpa a lista antes de adicionar as novas vendas
 
         if (data.length === 0) {
@@ -164,6 +211,10 @@ function loadVendas() {
     .catch(error => {
         console.log('Erro ao carregar vendas:', error);
         const vendaList = document.getElementById('vendaList');
+        if (!vendaList) {
+            console.error('Elemento vendaList não encontrado no DOM');
+            return;
+        }
         vendaList.innerHTML = ''; // Limpa a lista em caso de erro
         const errorRow = document.createElement('tr');
         const errorCell = document.createElement('td');
