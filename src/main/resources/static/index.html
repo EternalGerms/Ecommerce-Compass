@@ -145,7 +145,21 @@
             <input type="month" id="reportMonth" required>
             <button type="submit">Gerar Relatório</button>
         </form>
-        <div id="monthlyReportResult"></div>
+        <div id="monthlyReportResult">
+            <table id="monthlyReportTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortMonthlyReport('id')">ID</th>
+                        <th onclick="sortMonthlyReport('idProduto')">ID do Produto</th>
+                        <th onclick="sortMonthlyReport('data')">Data</th>
+                        <th onclick="sortMonthlyReport('quantidade')">Quantidade</th>
+                    </tr>
+                </thead>
+                <tbody id="monthlyReportList">
+                    <!-- Linhas da tabela serão adicionadas dinamicamente aqui -->
+                </tbody>
+            </table>
+        </div>
     </section>
 
     <section>
@@ -155,7 +169,21 @@
             <input type="date" id="reportWeek" required>
             <button type="submit">Gerar Relatório</button>
         </form>
-        <div id="weeklyReportResult"></div>
+        <div id="weeklyReportResult">
+            <table id="weeklyReportTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortWeeklyReport('id')">ID</th>
+                        <th onclick="sortWeeklyReport('idProduto')">ID do Produto</th>
+                        <th onclick="sortWeeklyReport('data')">Data</th>
+                        <th onclick="sortWeeklyReport('quantidade')">Quantidade</th>
+                    </tr>
+                </thead>
+                <tbody id="weeklyReportList">
+                    <!-- Linhas da tabela serão adicionadas dinamicamente aqui -->
+                </tbody>
+            </table>
+        </div>
     </section>
 
     <script src="scripts.js"></script>

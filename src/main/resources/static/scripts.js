@@ -72,15 +72,15 @@ function loadProducts() {
                 nomeCell.innerText = product.nome;
                 row.appendChild(nomeCell);
 
-                // Coluna Preço
-                const precoCell = document.createElement('td');
-                precoCell.innerText = product.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                row.appendChild(precoCell);
-
                 // Coluna Estoque
                 const estoqueCell = document.createElement('td');
-                estoqueCell.innerText = product.estoque;
+                estoqueCell.innerText = product.estoque; // Garante que o estoque seja um número inteiro
                 row.appendChild(estoqueCell);
+
+                // Coluna Preço
+                const precoCell = document.createElement('td');
+                precoCell.innerText = product.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); // Formata o preço como moeda
+                row.appendChild(precoCell);
 
                 // Coluna Ativo
                 const ativoCell = document.createElement('td');
@@ -403,8 +403,36 @@ document.getElementById('filterVendasForm').addEventListener('submit', function 
     });
 });
 
-document.getElementById('monthlyReportForm').addEventListener('submit', function (e) {
-    e.preventDefault();
+// Variáveis para ordenação dos relatórios
+let currentMonthlyReportSortField = 'data';
+let currentWeeklyReportSortField = 'data';
+let monthlyReportSortDirection = 1;
+let weeklyReportSortDirection = 1;
+
+// Função para ordenar relatório mensal
+function sortMonthlyReport(field) {
+    if (field === currentMonthlyReportSortField) {
+        monthlyReportSortDirection = -monthlyReportSortDirection;
+    } else {
+        currentMonthlyReportSortField = field;
+        monthlyReportSortDirection = 1;
+    }
+    loadMonthlyReport();
+}
+
+// Função para ordenar relatório semanal
+function sortWeeklyReport(field) {
+    if (field === currentWeeklyReportSortField) {
+        weeklyReportSortDirection = -weeklyReportSortDirection;
+    } else {
+        currentWeeklyReportSortField = field;
+        weeklyReportSortDirection = 1;
+    }
+    loadWeeklyReport();
+}
+
+// Função para carregar relatório mensal
+function loadMonthlyReport() {
     const reportMonth = document.getElementById('reportMonth').value + '-01';
 
     fetch(`/api/vendas/relatorio-mensal?mesAno=${reportMonth}`)
@@ -415,23 +443,139 @@ document.getElementById('monthlyReportForm').addEventListener('submit', function
         return response.json();
     })
     .then(data => {
-        document.getElementById('monthlyReportResult').innerText = JSON.stringify(data, null, 2);
+        const monthlyReportList = document.getElementById('monthlyReportList');
+        if (!monthlyReportList) {
+            console.error('Elemento monthlyReportList não encontrado no DOM');
+            return;
+        }
+        monthlyReportList.innerHTML = ''; // Limpa a lista antes de adicionar os novos dados
+
+        if (data.length === 0) {
+            const noDataRow = document.createElement('tr');
+            const noDataCell = document.createElement('td');
+            noDataCell.colSpan = 4;
+            noDataCell.innerText = 'Nenhum dado encontrado.';
+            noDataRow.appendChild(noDataCell);
+            monthlyReportList.appendChild(noDataRow);
+        } else {
+            // Ordena os dados com base no campo e direção atuais
+            data.sort((a, b) => {
+                const fieldA = a[currentMonthlyReportSortField];
+                const fieldB = b[currentMonthlyReportSortField];
+                
+                if (typeof fieldA === 'string') {
+                    return monthlyReportSortDirection * fieldA.localeCompare(fieldB);
+                } else {
+                    return monthlyReportSortDirection * (fieldA - fieldB);
+                }
+            });
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                
+                const idCell = document.createElement('td');
+                idCell.innerText = item.id !== undefined ? item.id : 'N/A';
+                row.appendChild(idCell);
+
+                const idProdutoCell = document.createElement('td');
+                idProdutoCell.innerText = item['id-produto'] !== undefined ? item['id-produto'] : 'N/A';
+                row.appendChild(idProdutoCell);
+
+                const dataCell = document.createElement('td');
+                dataCell.innerText = item.dataVenda !== undefined ? item.dataVenda : 'N/A';
+                row.appendChild(dataCell);
+
+                const quantidadeCell = document.createElement('td');
+                quantidadeCell.innerText = item.quantidade !== undefined ? item.quantidade : 'N/A';
+                row.appendChild(quantidadeCell);
+
+                monthlyReportList.appendChild(row);
+            });
+        }
     })
     .catch(error => {
-        document.getElementById('monthlyReportResult').innerText = 'Erro: ' + error.message;
+        const monthlyReportResult = document.getElementById('monthlyReportResult');
+        if (!monthlyReportResult) {
+            console.error('Elemento monthlyReportResult não encontrado no DOM');
+            return;
+        }
+        monthlyReportResult.innerText = 'Erro: ' + error.message;
     });
-});
+}
 
-document.getElementById('weeklyReportForm').addEventListener('submit', function (e) {
-    e.preventDefault();
+// Função para carregar relatório semanal
+function loadWeeklyReport() {
     const reportWeek = document.getElementById('reportWeek').value;
 
     fetch(`/api/vendas/relatorio-semanal?semana=${reportWeek}`)
     .then(response => response.json())
     .then(data => {
-        document.getElementById('weeklyReportResult').innerText = JSON.stringify(data, null, 2);
+        const weeklyReportList = document.getElementById('weeklyReportList');
+        if (!weeklyReportList) {
+            console.error('Elemento weeklyReportList não encontrado no DOM');
+            return;
+        }
+        weeklyReportList.innerHTML = ''; // Limpa a lista antes de adicionar os novos dados
+
+        if (data.length === 0) {
+            const noDataRow = document.createElement('tr');
+            const noDataCell = document.createElement('td');
+            noDataCell.colSpan = 4;
+            noDataCell.innerText = 'Nenhum dado encontrado.';
+            noDataRow.appendChild(noDataCell);
+            weeklyReportList.appendChild(noDataRow);
+        } else {
+            // Ordena os dados com base no campo e direção atuais
+            data.sort((a, b) => {
+                const fieldA = a[currentWeeklyReportSortField];
+                const fieldB = b[currentWeeklyReportSortField];
+                
+                if (typeof fieldA === 'string') {
+                    return weeklyReportSortDirection * fieldA.localeCompare(fieldB);
+                } else {
+                    return weeklyReportSortDirection * (fieldA - fieldB);
+                }
+            });
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                
+                const idCell = document.createElement('td');
+                idCell.innerText = item.id !== undefined ? item.id : 'N/A';
+                row.appendChild(idCell);
+
+                const idProdutoCell = document.createElement('td');
+                idProdutoCell.innerText = item['id-produto'] !== undefined ? item['id-produto'] : 'N/A';
+                row.appendChild(idProdutoCell);
+
+                const dataCell = document.createElement('td');
+                dataCell.innerText = item.dataVenda !== undefined ? item.dataVenda : 'N/A';
+                row.appendChild(dataCell);
+
+                const quantidadeCell = document.createElement('td');
+                quantidadeCell.innerText = item.quantidade !== undefined ? item.quantidade : 'N/A';
+                row.appendChild(quantidadeCell);
+
+                weeklyReportList.appendChild(row);
+            });
+        }
     })
     .catch(error => {
-        document.getElementById('weeklyReportResult').innerText = 'Erro: ' + error.message;
+        const weeklyReportResult = document.getElementById('weeklyReportResult');
+        if (!weeklyReportResult) {
+            console.error('Elemento weeklyReportResult não encontrado no DOM');
+            return;
+        }
+        weeklyReportResult.innerText = 'Erro: ' + error.message;
     });
+}
+
+document.getElementById('monthlyReportForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    loadMonthlyReport();
+});
+
+document.getElementById('weeklyReportForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    loadWeeklyReport();
 });
