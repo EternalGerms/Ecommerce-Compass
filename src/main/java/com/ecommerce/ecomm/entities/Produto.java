@@ -1,6 +1,5 @@
 package com.ecommerce.ecomm.entities;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -24,7 +23,7 @@ public class Produto {
     private String nome;
 
     @Column(nullable = false)
-    private BigDecimal preco;
+    private Double preco;
 
     @Column(nullable = false)
     private Integer estoque = 0;
@@ -54,11 +53,11 @@ public class Produto {
         this.nome = nome;
     }
 
-    public BigDecimal getPreco() {
+    public Double getPreco() {
         return preco;
     }
 
-    public void setPreco(BigDecimal preco) {
+    public void setPreco(Double preco) {
         this.preco = preco;
     }
 

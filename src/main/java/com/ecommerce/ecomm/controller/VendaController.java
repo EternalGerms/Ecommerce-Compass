@@ -1,22 +1,16 @@
 package com.ecommerce.ecomm.controller;
 
-import java.time.LocalDate;
-import java.util.List;
-
+import com.ecommerce.ecomm.dto.VendaDTO;
+import com.ecommerce.ecomm.entities.Venda;
+import com.ecommerce.ecomm.service.VendaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.ecommerce.ecomm.dto.VendaDTO;
-import com.ecommerce.ecomm.entities.Venda;
-import com.ecommerce.ecomm.service.VendaService;
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/vendas")
@@ -39,6 +33,26 @@ public class VendaController {
     public ResponseEntity<List<Venda>> listarVendas() {
         List<Venda> vendas = vendaService.listarVendas();
         return new ResponseEntity<>(vendas, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> atualizarVenda(@PathVariable Long id, @RequestBody VendaDTO vendaDTO) {
+        try {
+            Venda vendaAtualizada = vendaService.atualizarVenda(id, vendaDTO);
+            return new ResponseEntity<>(vendaAtualizada, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletarVenda(@PathVariable Long id) {
+        try {
+            vendaService.deletarVenda(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/filtrar")

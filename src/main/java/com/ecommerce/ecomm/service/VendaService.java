@@ -14,6 +14,8 @@ import com.ecommerce.ecomm.entities.Venda;
 import com.ecommerce.ecomm.repository.ProdutoRepository;
 import com.ecommerce.ecomm.repository.VendaRepository;
 
+import jakarta.validation.Valid;
+
 @Service
 public class VendaService {
 
@@ -23,14 +25,14 @@ public class VendaService {
     @Autowired
     private ProdutoRepository produtoRepository;
 
-    public Venda criarVenda(VendaDTO vendaDTO) {
+    public Venda criarVenda(@Valid VendaDTO vendaDTO) {
         Produto produto = produtoRepository.findById(vendaDTO.getIdProduto())
             .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
-        
+
         if (produto.getEstoque() < vendaDTO.getQuantidade()) {
-            throw new IllegalArgumentException("Estoque insuficiente para o produto: " + produto.getNome() + " ID: " + produto.getId());
+            throw new IllegalArgumentException("Estoque insuficiente para o produto: " + produto.getNome());
         }
-        
+
         produto.setEstoque(produto.getEstoque() - vendaDTO.getQuantidade());
         produtoRepository.save(produto);
 
@@ -45,6 +47,39 @@ public class VendaService {
 
     public List<Venda> listarVendas() {
         return vendaRepository.findAll();
+    }
+
+    public Venda atualizarVenda(Long id, @Valid VendaDTO vendaDTO) {
+        Venda vendaExistente = vendaRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Venda não encontrada"));
+
+        Produto produto = produtoRepository.findById(vendaDTO.getIdProduto())
+            .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
+
+        if (produto.getEstoque() + vendaExistente.getQuantidade() < vendaDTO.getQuantidade()) {
+            throw new IllegalArgumentException("Estoque insuficiente para o produto: " + produto.getNome());
+        }
+
+        produto.setEstoque(produto.getEstoque() + vendaExistente.getQuantidade() - vendaDTO.getQuantidade());
+        produtoRepository.save(produto);
+
+        vendaExistente.setProduto(produto);
+        vendaExistente.setQuantidade(vendaDTO.getQuantidade());
+        vendaExistente.setDataVenda(vendaDTO.getDataVenda());
+        vendaExistente.setIdProduto(produto.getId());
+
+        return vendaRepository.save(vendaExistente);
+    }
+
+    public void deletarVenda(Long id) {
+        Venda venda = vendaRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Venda não encontrada"));
+
+        Produto produto = venda.getProduto();
+        produto.setEstoque(produto.getEstoque() + venda.getQuantidade());
+        produtoRepository.save(produto);
+
+        vendaRepository.delete(venda);
     }
 
     public List<Venda> filtrarVendasPorData(LocalDate startDate, LocalDate endDate) {
