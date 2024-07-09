@@ -1,38 +1,35 @@
 package com.ecommerce.ecomm.controller;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.ecommerce.ecomm.dto.VendaDTO;
 import com.ecommerce.ecomm.entities.Venda;
 import com.ecommerce.ecomm.service.VendaService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/vendas")
 public class VendaController {
 
-    @Autowired
-    private VendaService vendaService;
+    private final VendaService vendaService;
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME;
+
+    public VendaController(VendaService vendaService) {
+        this.vendaService = vendaService;
+    }
 
     @PostMapping
-    public ResponseEntity<?> criarVenda(@RequestBody VendaDTO vendaDTO) {
+    public ResponseEntity<?> criarVenda(@Valid @RequestBody VendaDTO vendaDTO) {
         try {
-            Venda venda = vendaService.criarVenda(vendaDTO);
-            return new ResponseEntity<>(venda, HttpStatus.CREATED);
+            Venda novaVenda = vendaService.criarVenda(vendaDTO);
+            return new ResponseEntity<>(novaVenda, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -45,7 +42,7 @@ public class VendaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizarVenda(@PathVariable Long id, @RequestBody VendaDTO vendaDTO) {
+    public ResponseEntity<?> atualizarVenda(@PathVariable Long id, @Valid @RequestBody VendaDTO vendaDTO) {
         try {
             Venda vendaAtualizada = vendaService.atualizarVenda(id, vendaDTO);
             return new ResponseEntity<>(vendaAtualizada, HttpStatus.OK);
@@ -55,34 +52,50 @@ public class VendaController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletarVenda(@PathVariable Long id) {
-        try {
-            vendaService.deletarVenda(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<Void> deletarVenda(@PathVariable Long id) {
+        vendaService.deletarVenda(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/filtrar")
     public ResponseEntity<List<Venda>> filtrarVendasPorData(
-            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-        List<Venda> vendas = vendaService.filtrarVendasPorData(startDate, endDate);
-        return new ResponseEntity<>(vendas, HttpStatus.OK);
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        try {
+            OffsetDateTime startOffsetDateTime = OffsetDateTime.parse(startDate, dateTimeFormatter);
+            OffsetDateTime endOffsetDateTime = OffsetDateTime.parse(endDate, dateTimeFormatter);
+            LocalDateTime startLocalDateTime = startOffsetDateTime.toLocalDateTime();
+            LocalDateTime endLocalDateTime = endOffsetDateTime.toLocalDateTime();
+            List<Venda> vendas = vendaService.filtrarVendasPorData(startLocalDateTime, endLocalDateTime);
+            return new ResponseEntity<>(vendas, HttpStatus.OK);
+        } catch (DateTimeParseException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
-    @GetMapping("/relatorio-mensal")
+    @GetMapping("/relatorio/mensal")
     public ResponseEntity<List<Venda>> gerarRelatorioMensal(
-            @RequestParam("mesAno") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime mesAno) {
-        List<Venda> vendas = vendaService.gerarRelatorioMensal(mesAno);
-        return new ResponseEntity<>(vendas, HttpStatus.OK);
+            @RequestParam String mesAno) {
+        try {
+            OffsetDateTime mesAnoOffsetDateTime = OffsetDateTime.parse(mesAno, dateTimeFormatter);
+            LocalDateTime mesAnoLocalDateTime = mesAnoOffsetDateTime.toLocalDateTime();
+            List<Venda> vendas = vendaService.gerarRelatorioMensal(mesAnoLocalDateTime);
+            return new ResponseEntity<>(vendas, HttpStatus.OK);
+        } catch (DateTimeParseException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
-    @GetMapping("/relatorio-semanal")
+    @GetMapping("/relatorio/semanal")
     public ResponseEntity<List<Venda>> gerarRelatorioSemanal(
-            @RequestParam("semana") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime semana) {
-        List<Venda> vendas = vendaService.gerarRelatorioSemanal(semana);
-        return new ResponseEntity<>(vendas, HttpStatus.OK);
+            @RequestParam String semana) {
+        try {
+            OffsetDateTime semanaOffsetDateTime = OffsetDateTime.parse(semana, dateTimeFormatter);
+            LocalDateTime semanaLocalDateTime = semanaOffsetDateTime.toLocalDateTime();
+            List<Venda> vendas = vendaService.gerarRelatorioSemanal(semanaLocalDateTime);
+            return new ResponseEntity<>(vendas, HttpStatus.OK);
+        } catch (DateTimeParseException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 }

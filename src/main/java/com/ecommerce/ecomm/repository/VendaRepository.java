@@ -11,5 +11,5 @@ import com.ecommerce.ecomm.entities.Venda;
 @Repository
 public interface VendaRepository extends JpaRepository<Venda, Long> {
     List<Venda> findByDataVendaBetween(LocalDateTime startDate, LocalDateTime endDate);
+    List<Venda> findByProdutoId(Long produtoId);
 }
-

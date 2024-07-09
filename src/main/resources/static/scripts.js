@@ -254,7 +254,10 @@ function editVenda(venda) {
   document.getElementById("editVendaId").value = venda.id;
   document.getElementById("editVendaProductId").value = venda["id-produto"];
   document.getElementById("editVendaQuantidade").value = venda.quantidade;
-  document.getElementById("editVendaData").value = venda.dataVenda;
+  document.getElementById("editVendaData").value = venda.dataVenda.substring(
+    0,
+    16
+  ); // Formato ISO 8601 sem os segundos
 }
 
 function deleteVenda(vendaId) {
@@ -353,6 +356,9 @@ document
     const quantidade = document.getElementById("vendaQuantidade").value;
     const dataVenda = document.getElementById("vendaData").value;
 
+    // Formatar a data para o formato ISO 8601
+    const formattedDataVenda = dataVenda + ":00Z";
+
     fetch("/api/vendas", {
       method: "POST",
       headers: {
@@ -361,7 +367,7 @@ document
       body: JSON.stringify({
         idProduto: productId,
         quantidade: quantidade,
-        dataVenda: dataVenda,
+        dataVenda: formattedDataVenda,
       }),
     })
       .then((response) => {
@@ -397,42 +403,47 @@ document
     const quantidade = document.getElementById("editVendaQuantidade").value;
     const dataVenda = document.getElementById("editVendaData").value;
 
+    // Formatar a data para o formato ISO 8601
+    const formattedDataVenda = dataVenda + ":00Z";
+
     fetch(`/api/vendas/${vendaId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            idProduto: productId,
-            quantidade: quantidade,
-            dataVenda: dataVenda,
-        })
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        idProduto: productId,
+        quantidade: quantidade,
+        dataVenda: formattedDataVenda,
+      }),
     })
-    .then(response => {
-        console.log('Data sent:', {
-            produto_id: productId,
-            quantidade: quantidade,
-            data_venda: dataVenda,
+      .then((response) => {
+        console.log("Data sent:", {
+          idProduto: productId,
+          quantidade: quantidade,
+          dataVenda: formattedDataVenda,
         });
-        console.log('Response status:', response.status);
+        console.log("Response status:", response.status);
         if (!response.ok) {
-            return response.json().then(error => { 
-                console.error('Server error:', error);
-                throw new Error(error.message || 'Erro ao editar venda'); 
-            });
+          return response.json().then((error) => {
+            console.error("Server error:", error);
+            throw new Error(error.message || "Erro ao editar venda");
+          });
         }
         return response.json();
-    })
-    .then(data => {
-        console.log('Data received:', data);
-        document.getElementById('editVendaResult').innerText = 'Venda atualizada com sucesso!';
+      })
+      .then((data) => {
+        console.log("Data received:", data);
+        document.getElementById("editVendaResult").innerText =
+          "Venda atualizada com sucesso!";
         loadVendas(); // Refresh the sales list after updating a sale
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Erro ao editar venda: ' + error.message);
-        document.getElementById('editVendaResult').innerText = 'Erro: ' + error.message;
-    });
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Erro ao editar venda: " + error.message);
+        document.getElementById("editVendaResult").innerText =
+          "Erro: " + error.message;
+      });
   });
 
 document
@@ -442,7 +453,13 @@ document
     const startDate = document.getElementById("start-date").value;
     const endDate = document.getElementById("end-date").value;
 
-    fetch(`/api/vendas/filtrar?startDate=${startDate}&endDate=${endDate}`)
+    // Formatar as datas para o formato ISO 8601
+    const formattedStartDate = startDate + ":00Z";
+    const formattedEndDate = endDate + ":00Z";
+
+    fetch(
+      `/api/vendas/filtrar?startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+    )
       .then((response) => {
         if (!response.ok) {
           return response.json().then((error) => {
@@ -524,152 +541,138 @@ function sortWeeklyReport(field) {
 
 // Função para carregar relatório mensal
 function loadMonthlyReport() {
-  const reportMonth = document.getElementById("reportMonth").value + "-01";
-
-  fetch(`/api/vendas/relatorio-mensal?mesAno=${reportMonth}`)
-    .then((response) => {
-      if (!response.ok) {
-        return response.json().then((error) => {
-          throw new Error(error.message || "Erro ao gerar relatório mensal");
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      const monthlyReportList = document.getElementById("monthlyReportList");
-      if (!monthlyReportList) {
-        console.error("Elemento monthlyReportList não encontrado no DOM");
-        return;
-      }
-      monthlyReportList.innerHTML = ""; // Limpa a lista antes de adicionar os novos dados
-
-      if (data.length === 0) {
-        const noDataRow = document.createElement("tr");
-        const noDataCell = document.createElement("td");
-        noDataCell.colSpan = 4;
-        noDataCell.innerText = "Nenhum dado encontrado.";
-        noDataRow.appendChild(noDataCell);
-        monthlyReportList.appendChild(noDataRow);
-      } else {
-        // Ordena os dados com base no campo e direção atuais
-        data.sort((a, b) => {
-          const fieldA = a[currentMonthlyReportSortField];
-          const fieldB = b[currentMonthlyReportSortField];
-
-          if (typeof fieldA === "string") {
-            return monthlyReportSortDirection * fieldA.localeCompare(fieldB);
-          } else {
-            return monthlyReportSortDirection * (fieldA - fieldB);
-          }
-        });
-
-        data.forEach((item) => {
-          const row = document.createElement("tr");
-
-          const idCell = document.createElement("td");
-          idCell.innerText = item.id !== undefined ? item.id : "N/A";
-          row.appendChild(idCell);
-
-          const idProdutoCell = document.createElement("td");
-          idProdutoCell.innerText =
-            item["id-produto"] !== undefined ? item["id-produto"] : "N/A";
-          row.appendChild(idProdutoCell);
-
-          const dataCell = document.createElement("td");
-          dataCell.innerText =
-            item.dataVenda !== undefined ? item.dataVenda : "N/A";
-          row.appendChild(dataCell);
-
-          const quantidadeCell = document.createElement("td");
-          quantidadeCell.innerText =
-            item.quantidade !== undefined ? item.quantidade : "N/A";
-          row.appendChild(quantidadeCell);
-
-          monthlyReportList.appendChild(row);
-        });
-      }
-    })
-    .catch((error) => {
-      const monthlyReportResult = document.getElementById(
-        "monthlyReportResult"
-      );
-      if (!monthlyReportResult) {
-        console.error("Elemento monthlyReportResult não encontrado no DOM");
-        return;
-      }
-      monthlyReportResult.innerText = "Erro: " + error.message;
-    });
-}
+    const reportMonth = document.getElementById("reportMonth").value;
+    const formattedReportMonth = reportMonth + "-01T00:00:00Z"; // Formata a data para o formato ISO 8601
+  
+    fetch(`/api/vendas/relatorio/mensal?mesAno=${formattedReportMonth}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Processa os dados recebidos e exibe no front-end
+        const monthlyReportList = document.getElementById("monthlyReportList");
+        monthlyReportList.innerHTML = ""; // Limpa a lista antes de adicionar os novos dados
+  
+        if (data.length === 0) {
+          const noDataRow = document.createElement("tr");
+          const noDataCell = document.createElement("td");
+          noDataCell.colSpan = 4;
+          noDataCell.innerText = "Nenhum dado encontrado.";
+          noDataRow.appendChild(noDataCell);
+          monthlyReportList.appendChild(noDataRow);
+        } else {
+          data.forEach(item => {
+            const row = document.createElement("tr");
+            const idCell = document.createElement("td");
+            idCell.innerText = item.id;
+            row.appendChild(idCell);
+  
+            const idProdutoCell = document.createElement("td");
+            idProdutoCell.innerText = item["id-produto"];
+            row.appendChild(idProdutoCell);
+  
+            const dataCell = document.createElement("td");
+            dataCell.innerText = item.dataVenda;
+            row.appendChild(dataCell);
+  
+            const quantidadeCell = document.createElement("td");
+            quantidadeCell.innerText = item.quantidade;
+            row.appendChild(quantidadeCell);
+  
+            monthlyReportList.appendChild(row);
+          });
+        }
+      })
+      .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+      });
+  }
 
 // Função para carregar relatório semanal
 function loadWeeklyReport() {
-  const reportWeek = document.getElementById("reportWeek").value;
-
-  fetch(`/api/vendas/relatorio-semanal?semana=${reportWeek}`)
-    .then((response) => response.json())
-    .then((data) => {
-      const weeklyReportList = document.getElementById("weeklyReportList");
-      if (!weeklyReportList) {
-        console.error("Elemento weeklyReportList não encontrado no DOM");
-        return;
-      }
-      weeklyReportList.innerHTML = ""; // Limpa a lista antes de adicionar os novos dados
-
-      if (data.length === 0) {
-        const noDataRow = document.createElement("tr");
-        const noDataCell = document.createElement("td");
-        noDataCell.colSpan = 4;
-        noDataCell.innerText = "Nenhum dado encontrado.";
-        noDataRow.appendChild(noDataCell);
-        weeklyReportList.appendChild(noDataRow);
-      } else {
-        // Ordena os dados com base no campo e direção atuais
-        data.sort((a, b) => {
-          const fieldA = a[currentWeeklyReportSortField];
-          const fieldB = b[currentWeeklyReportSortField];
-
-          if (typeof fieldA === "string") {
-            return weeklyReportSortDirection * fieldA.localeCompare(fieldB);
-          } else {
-            return weeklyReportSortDirection * (fieldA - fieldB);
-          }
-        });
-
-        data.forEach((item) => {
-          const row = document.createElement("tr");
-
-          const idCell = document.createElement("td");
-          idCell.innerText = item.id !== undefined ? item.id : "N/A";
-          row.appendChild(idCell);
-
-          const idProdutoCell = document.createElement("td");
-          idProdutoCell.innerText =
-            item["id-produto"] !== undefined ? item["id-produto"] : "N/A";
-          row.appendChild(idProdutoCell);
-
-          const dataCell = document.createElement("td");
-          dataCell.innerText =
-            item.dataVenda !== undefined ? item.dataVenda : "N/A";
-          row.appendChild(dataCell);
-
-          const quantidadeCell = document.createElement("td");
-          quantidadeCell.innerText =
-            item.quantidade !== undefined ? item.quantidade : "N/A";
-          row.appendChild(quantidadeCell);
-
-          weeklyReportList.appendChild(row);
-        });
-      }
-    })
-    .catch((error) => {
-      const weeklyReportResult = document.getElementById("weeklyReportResult");
-      if (!weeklyReportResult) {
-        console.error("Elemento weeklyReportResult não encontrado no DOM");
-        return;
-      }
-      weeklyReportResult.innerText = "Erro: " + error.message;
-    });
-}
+    const reportWeek = document.getElementById("reportWeek").value;
+    console.log("reportWeek:", reportWeek); // Adicione este log
+    const formattedReportWeek = reportWeek + ":00Z"; // Append seconds and 'Z' for UTC time
+    console.log("formattedReportWeek:", formattedReportWeek); // Adicione este log
+  
+    fetch(`/api/vendas/relatorio/semanal?semana=${encodeURIComponent(formattedReportWeek)}`)
+      .then((response) => {
+        console.log("Response status:", response.status); // Adicione este log
+        if (!response.ok) {
+          return response.json().then((error) => {
+            throw new Error(error.message || "Erro ao gerar relatório semanal");
+          });
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Data received:", data); // Adicione este log
+        const weeklyReportList = document.getElementById("weeklyReportList");
+        if (!weeklyReportList) {
+          console.error("Elemento weeklyReportList não encontrado no DOM");
+          return;
+        }
+        weeklyReportList.innerHTML = ""; // Limpa a lista antes de adicionar os novos dados
+  
+        if (data.length === 0) {
+          const noDataRow = document.createElement("tr");
+          const noDataCell = document.createElement("td");
+          noDataCell.colSpan = 4;
+          noDataCell.innerText = "Nenhum dado encontrado.";
+          noDataRow.appendChild(noDataCell);
+          weeklyReportList.appendChild(noDataRow);
+        } else {
+          // Ordena os dados com base no campo e direção atuais
+          data.sort((a, b) => {
+            const fieldA = a[currentWeeklyReportSortField];
+            const fieldB = b[currentWeeklyReportSortField];
+  
+            if (typeof fieldA === "string") {
+              return weeklyReportSortDirection * fieldA.localeCompare(fieldB);
+            } else {
+              return weeklyReportSortDirection * (fieldA - fieldB);
+            }
+          });
+  
+          data.forEach((item) => {
+            const row = document.createElement("tr");
+  
+            const idCell = document.createElement("td");
+            idCell.innerText = item.id !== undefined ? item.id : "N/A";
+            row.appendChild(idCell);
+  
+            const idProdutoCell = document.createElement("td");
+            idProdutoCell.innerText =
+              item["id-produto"] !== undefined ? item["id-produto"] : "N/A";
+            row.appendChild(idProdutoCell);
+  
+            const dataCell = document.createElement("td");
+            dataCell.innerText =
+              item.dataVenda !== undefined ? item.dataVenda : "N/A";
+            row.appendChild(dataCell);
+  
+            const quantidadeCell = document.createElement("td");
+            quantidadeCell.innerText =
+              item.quantidade !== undefined ? item.quantidade : "N/A";
+            row.appendChild(quantidadeCell);
+  
+            weeklyReportList.appendChild(row);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error); // Adicione este log
+        const weeklyReportResult = document.getElementById("weeklyReportResult");
+        if (!weeklyReportResult) {
+          console.error("Elemento weeklyReportResult não encontrado no DOM");
+          return;
+        }
+        weeklyReportResult.innerText = "Erro: " + error.message;
+      });
+  }
 
 document
   .getElementById("monthlyReportForm")

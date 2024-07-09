@@ -1,6 +1,5 @@
 package com.ecommerce.ecomm.entities;
 
-
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -45,65 +44,45 @@ public class Venda {
         }
     }
     
-	public Venda(Long id, Produto produto, Integer quantidade, LocalDateTime dataVenda) {
-		this.id = id;
-		this.produto = produto;
-		this.quantidade = quantidade;
-		this.dataVenda = dataVenda;
-	}
-	
-	public Venda() {
+    // Getters e Setters
 
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Produto getProduto() {
+        return produto;
+    }
 
-	public Produto getProduto() {
-		return produto;
-	}
+    public void setProduto(Produto produto) {
+        this.produto = produto;
+    }
 
-	public void setProduto(Produto produto) {
-		this.produto = produto;
-	}
+    public Integer getQuantidade() {
+        return quantidade;
+    }
 
-	public Integer getQuantidade() {
-		return quantidade;
-	}
+    public void setQuantidade(Integer quantidade) {
+        this.quantidade = quantidade;
+    }
 
-	public void setQuantidade(Integer quantidade) {
-		this.quantidade = quantidade;
-	}
+    public LocalDateTime getDataVenda() {
+        return dataVenda;
+    }
 
-	public LocalDateTime getDataVenda() {
-		return dataVenda;
-	}
+    public void setDataVenda(LocalDateTime dataVenda) {
+        this.dataVenda = dataVenda;
+    }
 
-	public void setDataVenda(LocalDateTime dataVenda) {
-		this.dataVenda = dataVenda;
-	}
+    public Long getIdProduto() {
+        return idProduto;
+    }
 
-	public Long getIdProduto() {
-		return idProduto;
-	}
-
-	public void setIdProduto(Long idProduto) {
-		this.idProduto = idProduto;
-	}
-	
-	
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    public void setIdProduto(Long idProduto) {
+        this.idProduto = idProduto;
+    }
 }

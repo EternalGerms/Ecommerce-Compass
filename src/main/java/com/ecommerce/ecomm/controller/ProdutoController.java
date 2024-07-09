@@ -23,7 +23,6 @@ import jakarta.validation.Valid;
 public class ProdutoController {
 
     private final ProdutoService produtoService;
-    
 
     public ProdutoController(ProdutoService produtoService) {
         this.produtoService = produtoService;
