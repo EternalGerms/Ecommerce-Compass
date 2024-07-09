@@ -1,191 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>eCommerce API Interface</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <h1>eCommerce API Interface</h1>
 
     <section>
-        <h2>Listar Produtos</h2>
-        <div>
-            <button id="refreshProductList">Atualizar Lista de Produtos</button>
-        </div>
-        <table id="productTable">
-            <thead>
-                <tr>
-                    <th onclick="sortProducts('id')">ID</th>
-                    <th onclick="sortProducts('nome')">Nome</th>
-                    <th onclick="sortProducts('estoque')">Estoque</th>
-                    <th onclick="sortProducts('preco')">Preço</th>
-                    <th>Ativo</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="productList">
-                <!-- Linhas da tabela serão adicionadas dinamicamente aqui -->
-            </tbody>
+      <h2>Listar Produtos</h2>
+      <div>
+        <button id="refreshProductList">Atualizar Lista de Produtos</button>
+      </div>
+      <table id="productTable">
+        <thead>
+          <tr>
+            <th onclick="sortProducts('id')">ID</th>
+            <th onclick="sortProducts('nome')">Nome</th>
+            <th onclick="sortProducts('estoque')">Estoque</th>
+            <th onclick="sortProducts('preco')">Preço</th>
+            <th>Ativo</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="productList">
+          <!-- Linhas da tabela serão adicionadas dinamicamente aqui -->
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Criar Produto</h2>
+      <form id="createProductForm">
+        <label for="productName">Nome:</label>
+        <input type="text" id="productName" required />
+        <label for="productStock">Estoque:</label>
+        <input type="number" id="productStock" required />
+        <label for="productPrice">Preço:</label>
+        <input type="number" id="productPrice" step="0.01" required />
+        <button type="submit">Criar Produto</button>
+      </form>
+      <div id="createProductResult"></div>
+    </section>
+
+    <section>
+      <h2>Editar Produto</h2>
+      <form id="editProductForm">
+        <input type="hidden" id="editProductId" />
+        <label for="editProductName">Nome:</label>
+        <input type="text" id="editProductName" required />
+        <label for="editProductStock">Estoque:</label>
+        <input type="number" id="editProductStock" required />
+        <label for="editProductPrice">Preço:</label>
+        <input type="number" id="editProductPrice" step="0.01" required />
+        <button type="submit">Atualizar Produto</button>
+      </form>
+      <div id="editProductResult"></div>
+    </section>
+
+    <section>
+      <h2>Listar Vendas</h2>
+      <div>
+        <button id="refreshSalesList">Atualizar Lista de Vendas</button>
+      </div>
+      <table id="salesTable">
+        <thead>
+          <tr>
+            <th onclick="sortVendas('id')">ID</th>
+            <th onclick="sortVendas('id-produto')">ID do Produto</th>
+            <th onclick="sortVendas('quantidade')">Quantidade</th>
+            <th onclick="sortVendas('dataVenda')">Data da Venda</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="vendaList">
+          <!-- Linhas da tabela serão adicionadas dinamicamente aqui -->
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Criar Venda</h2>
+      <form id="createVendaForm">
+        <label for="vendaProductId">ID do Produto:</label>
+        <input type="number" id="vendaProductId" required />
+        <label for="vendaQuantidade">Quantidade:</label>
+        <input type="number" id="vendaQuantidade" required />
+        <label for="vendaData">Data da Venda:</label>
+        <input type="date" id="vendaData" required />
+        <button type="submit">Criar Venda</button>
+      </form>
+      <div id="createVendaResult"></div>
+    </section>
+
+    <section>
+      <h2>Editar Venda</h2>
+      <form id="editVendaForm">
+        <input type="hidden" id="editVendaId" />
+        <label for="editVendaProductId">ID do Produto:</label>
+        <input type="number" id="editVendaProductId" required />
+        <label for="editVendaQuantidade">Quantidade:</label>
+        <input type="number" id="editVendaQuantidade" required />
+        <label for="editVendaData">Data da Venda:</label>
+        <input type="date" id="editVendaData" required />
+        <button type="submit">Atualizar Venda</button>
+      </form>
+      <div id="editVendaResult"></div>
+    </section>
+
+    <section>
+      <h2>Filtrar Vendas</h2>
+      <form id="filterVendasForm">
+        <label for="start-date">Data inicial:</label>
+        <input type="date" id="start-date" name="start-date" required />
+        <label for="end-date">Data final:</label>
+        <input type="date" id="end-date" name="end-date" required />
+        <button type="submit">Buscar</button>
+      </form>
+      <div id="filterVendasResult">
+        <table id="filterVendasTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>ID do Produto</th>
+              <th>Quantidade</th>
+              <th>Data da Venda</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows will be added dynamically here -->
+          </tbody>
         </table>
-    </section>
-    
-
-    <section>
-        <h2>Criar Produto</h2>
-        <form id="createProductForm">
-            <label for="productName">Nome:</label>
-            <input type="text" id="productName" required>
-            <label for="productStock">Estoque:</label>
-            <input type="number" id="productStock" required>
-            <label for="productPrice">Preço:</label>
-            <input type="number" id="productPrice" step="0.01" required>
-            <button type="submit">Criar Produto</button>
-        </form>
-        <div id="createProductResult"></div>
+      </div>
     </section>
 
     <section>
-        <h2>Editar Produto</h2>
-        <form id="editProductForm">
-            <input type="hidden" id="editProductId">
-            <label for="editProductName">Nome:</label>
-            <input type="text" id="editProductName" required>
-            <label for="editProductStock">Estoque:</label>
-            <input type="number" id="editProductStock" required>
-            <label for="editProductPrice">Preço:</label>
-            <input type="number" id="editProductPrice" step="0.01" required>
-            <button type="submit">Atualizar Produto</button>
-        </form>
-        <div id="editProductResult"></div>
-    </section>
-
-    <section>
-        <h2>Listar Vendas</h2>
-        <div>
-            <!-- Botões de ordenação removidos -->
-            <button id="refreshSalesList">Atualizar Lista de Vendas</button>
-        </div>
-        <table id="salesTable">
-            <thead>
-                <tr>
-                    <th onclick="sortVendas('id')">ID</th>
-                    <th onclick="sortVendas('id-produto')">ID do Produto</th>
-                    <th onclick="sortVendas('quantidade')">Quantidade</th>
-                    <th onclick="sortVendas('dataVenda')">Data da Venda</th>
-                    <th></th> <!-- Coluna vazia para os botões -->
-                </tr>
-            </thead>
-            <tbody id="vendaList">
-                <!-- Linhas da tabela serão adicionadas dinamicamente aqui -->
-            </tbody>
+      <h2>Gerar Relatório Mensal</h2>
+      <form id="monthlyReportForm">
+        <label for="reportMonth">Mês:</label>
+        <input type="month" id="reportMonth" required />
+        <button type="submit">Gerar Relatório</button>
+      </form>
+      <div id="monthlyReportResult">
+        <table id="monthlyReportTable">
+          <thead>
+            <tr>
+              <th onclick="sortMonthlyReport('id')">ID</th>
+              <th onclick="sortMonthlyReport('idProduto')">ID do Produto</th>
+              <th onclick="sortMonthlyReport('data')">Data</th>
+              <th onclick="sortMonthlyReport('quantidade')">Quantidade</th>
+            </tr>
+          </thead>
+          <tbody id="monthlyReportList">
+            <!-- Linhas da tabela serão adicionadas dinamicamente aqui -->
+          </tbody>
         </table>
-    </section>
-    
-    <section>
-        <h2>Criar Venda</h2>
-        <form id="createVendaForm">
-            <label for="vendaProductId">ID do Produto:</label>
-            <input type="number" id="vendaProductId" required>
-            <label for="vendaQuantidade">Quantidade:</label>
-            <input type="number" id="vendaQuantidade" required>
-            <label for="vendaData">Data da Venda:</label>
-            <input type="date" id="vendaData" required>
-            <button type="submit">Criar Venda</button>
-        </form>
-        <div id="createVendaResult"></div>
+      </div>
     </section>
 
     <section>
-        <h2>Editar Venda</h2>
-        <form id="editVendaForm">
-            <input type="hidden" id="editVendaId">
-            <label for="editVendaProductId">ID do Produto:</label>
-            <input type="number" id="editVendaProductId" required>
-            <label for="editVendaQuantidade">Quantidade:</label>
-            <input type="number" id="editVendaQuantidade" required>
-            <label for="editVendaData">Data da Venda:</label>
-            <input type="date" id="editVendaData" required>
-            <button type="submit">Atualizar Venda</button>
-        </form>
-        <div id="editVendaResult"></div>
-    </section>
-
-    <section>
-        <h2>Filtrar Vendas</h2>
-        <form id="filterVendasForm">
-            <label for="start-date">Data inicial:</label>
-            <input type="date" id="start-date" name="start-date" required>
-            <label for="end-date">Data final:</label>
-            <input type="date" id="end-date" name="end-date" required>
-            <button type="submit">Buscar</button>
-        </form>
-        <div id="filterVendasResult">
-            <table id="filterVendasTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>ID do Produto</th>
-                        <th>Quantidade</th>
-                        <th>Data da Venda</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Rows will be added dynamically here -->
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <section>
-        <h2>Gerar Relatório Mensal</h2>
-        <form id="monthlyReportForm">
-            <label for="reportMonth">Mês:</label>
-            <input type="month" id="reportMonth" required>
-            <button type="submit">Gerar Relatório</button>
-        </form>
-        <div id="monthlyReportResult">
-            <table id="monthlyReportTable">
-                <thead>
-                    <tr>
-                        <th onclick="sortMonthlyReport('id')">ID</th>
-                        <th onclick="sortMonthlyReport('idProduto')">ID do Produto</th>
-                        <th onclick="sortMonthlyReport('data')">Data</th>
-                        <th onclick="sortMonthlyReport('quantidade')">Quantidade</th>
-                    </tr>
-                </thead>
-                <tbody id="monthlyReportList">
-                    <!-- Linhas da tabela serão adicionadas dinamicamente aqui -->
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <section>
-        <h2>Gerar Relatório Semanal</h2>
-        <form id="weeklyReportForm">
-            <label for="reportWeek">Semana:</label>
-            <input type="date" id="reportWeek" required>
-            <button type="submit">Gerar Relatório</button>
-        </form>
-        <div id="weeklyReportResult">
-            <table id="weeklyReportTable">
-                <thead>
-                    <tr>
-                        <th onclick="sortWeeklyReport('id')">ID</th>
-                        <th onclick="sortWeeklyReport('idProduto')">ID do Produto</th>
-                        <th onclick="sortWeeklyReport('data')">Data</th>
-                        <th onclick="sortWeeklyReport('quantidade')">Quantidade</th>
-                    </tr>
-                </thead>
-                <tbody id="weeklyReportList">
-                    <!-- Linhas da tabela serão adicionadas dinamicamente aqui -->
-                </tbody>
-            </table>
-        </div>
+      <h2>Gerar Relatório Semanal</h2>
+      <form id="weeklyReportForm">
+        <label for="reportWeek">Semana:</label>
+        <input type="date" id="reportWeek" required />
+        <button type="submit">Gerar Relatório</button>
+      </form>
+      <div id="weeklyReportResult">
+        <table id="weeklyReportTable">
+          <thead>
+            <tr>
+              <th onclick="sortWeeklyReport('id')">ID</th>
+              <th onclick="sortWeeklyReport('idProduto')">ID do Produto</th>
+              <th onclick="sortWeeklyReport('data')">Data</th>
+              <th onclick="sortWeeklyReport('quantidade')">Quantidade</th>
+            </tr>
+          </thead>
+          <tbody id="weeklyReportList">
+            <!-- Linhas da tabela serão adicionadas dinamicamente aqui -->
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <script src="scripts.js"></script>
-</body>
+  </body>
 </html>

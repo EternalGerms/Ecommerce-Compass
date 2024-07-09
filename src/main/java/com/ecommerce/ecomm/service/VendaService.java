@@ -1,7 +1,7 @@
 package com.ecommerce.ecomm.service;
 
 import java.time.DayOfWeek;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 
 @Service
 public class VendaService {
+	
 
     @Autowired
     private VendaRepository vendaRepository;
@@ -82,19 +83,19 @@ public class VendaService {
         vendaRepository.delete(venda);
     }
 
-    public List<Venda> filtrarVendasPorData(LocalDate startDate, LocalDate endDate) {
+    public List<Venda> filtrarVendasPorData(LocalDateTime startDate, LocalDateTime endDate) {
         return vendaRepository.findByDataVendaBetween(startDate, endDate);
     }
 
-    public List<Venda> gerarRelatorioMensal(LocalDate mesAno) {
-        LocalDate startDate = mesAno.withDayOfMonth(1);
-        LocalDate endDate = mesAno.withDayOfMonth(mesAno.lengthOfMonth());
+    public List<Venda> gerarRelatorioMensal(LocalDateTime mesAno) {
+    	LocalDateTime startDate = mesAno.withDayOfMonth(1);
+    	LocalDateTime endDate = mesAno.withDayOfMonth(mesAno.getMonthValue());
         return filtrarVendasPorData(startDate, endDate);
     }
 
-    public List<Venda> gerarRelatorioSemanal(LocalDate semana) {
-        LocalDate startDate = semana.with(DayOfWeek.MONDAY);
-        LocalDate endDate = semana.with(DayOfWeek.SUNDAY);
+    public List<Venda> gerarRelatorioSemanal(LocalDateTime semana) {
+    	LocalDateTime startDate = semana.with(DayOfWeek.MONDAY);
+    	LocalDateTime endDate = semana.with(DayOfWeek.SUNDAY);
         return filtrarVendasPorData(startDate, endDate);
     }
 }

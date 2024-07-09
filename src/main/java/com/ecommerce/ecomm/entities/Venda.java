@@ -1,8 +1,10 @@
 package com.ecommerce.ecomm.entities;
 
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Entity;
@@ -29,7 +31,8 @@ public class Venda {
 
     private Integer quantidade;
 
-    private LocalDate dataVenda;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    private LocalDateTime dataVenda;
     
     @JsonProperty("id-produto")
     private Long idProduto;
@@ -42,7 +45,7 @@ public class Venda {
         }
     }
     
-	public Venda(Long id, Produto produto, Integer quantidade, LocalDate dataVenda) {
+	public Venda(Long id, Produto produto, Integer quantidade, LocalDateTime dataVenda) {
 		this.id = id;
 		this.produto = produto;
 		this.quantidade = quantidade;
@@ -77,11 +80,11 @@ public class Venda {
 		this.quantidade = quantidade;
 	}
 
-	public LocalDate getDataVenda() {
+	public LocalDateTime getDataVenda() {
 		return dataVenda;
 	}
 
-	public void setDataVenda(LocalDate dataVenda) {
+	public void setDataVenda(LocalDateTime dataVenda) {
 		this.dataVenda = dataVenda;
 	}
 

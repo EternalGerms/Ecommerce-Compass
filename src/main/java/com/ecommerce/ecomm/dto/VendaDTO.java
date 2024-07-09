@@ -1,12 +1,16 @@
 package com.ecommerce.ecomm.dto;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class VendaDTO {
 	private Long id;
     private Long idProduto;
     private Integer quantidade;
-    private LocalDate dataVenda;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    private LocalDateTime dataVenda;
     
     
     // Getters and Setters
@@ -23,10 +27,10 @@ public class VendaDTO {
 	public void setQuantidade(Integer quantidade) {
 		this.quantidade = quantidade;
 	}
-	public LocalDate getDataVenda() {
+	public LocalDateTime getDataVenda() {
 		return dataVenda;
 	}
-	public void setDataVenda(LocalDate dataVenda) {
+	public void setDataVenda(LocalDateTime dataVenda) {
 		this.dataVenda = dataVenda;
 		
 	}
@@ -37,7 +41,7 @@ public class VendaDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public VendaDTO(Long idProduto, Integer quantidade, LocalDate dataVenda) {
+	public VendaDTO(Long idProduto, Integer quantidade, LocalDateTime dataVenda) {
 		this.idProduto = idProduto;
 		this.quantidade = quantidade;
 		this.dataVenda = dataVenda;
