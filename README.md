@@ -47,9 +47,9 @@ O projeto está organizado em pacotes que seguem as melhores práticas de desenv
 Edite o arquivo `application.properties` para configurar a conexão com o banco de dados:
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/ecommerce
-spring.datasource.username=postgres
-spring.datasource.password=popo123
+spring.datasource.url=jdbc:postgresql://localhost:5432/seu-banco-de-dados
+spring.datasource.username=seuusuario
+spring.datasource.password=suasenha
 spring.jpa.hibernate.ddl-auto=create-drop
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
