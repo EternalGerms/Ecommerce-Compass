@@ -2,6 +2,7 @@ package com.ecommerce.ecomm.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -26,6 +27,18 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(500, "Internal Server Error", "Ocorreu um erro inesperado");
         logger.info("Returning error response: {}", error);
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(404, "Not Found", ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+    
+    @ExceptionHandler(ProdutoInativoException.class)
+    public ResponseEntity<ErrorResponse> handleProdutoInativoException(ProdutoInativoException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(400, "Bad Request", ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }
 

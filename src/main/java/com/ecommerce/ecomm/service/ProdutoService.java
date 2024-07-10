@@ -11,7 +11,7 @@ import com.ecommerce.ecomm.entities.Produto;
 import com.ecommerce.ecomm.entities.Venda;
 import com.ecommerce.ecomm.exception.InvalidProductException;
 import com.ecommerce.ecomm.exception.NoContentException;
-import com.ecommerce.ecomm.exception.ProductInactivatedException;
+import com.ecommerce.ecomm.exception.ProdutoInativoException;
 import com.ecommerce.ecomm.repository.ProdutoRepository;
 import com.ecommerce.ecomm.repository.VendaRepository;
 
@@ -77,18 +77,23 @@ public class ProdutoService {
         return produtoRepository.save(produtoExistente);
     }
 
-    public void deletarProduto(Long id) {
+    public Produto deletarProduto(Long id) {
         Produto produto = produtoRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
+
+        if (!produto.isAtivo()) {
+            throw new ProdutoInativoException("Produto já está inativo e não pode ser excluído.");
+        }
 
         List<Venda> vendas = vendaRepository.findByProdutoId(id);
 
         if (!vendas.isEmpty()) {
             produto.setAtivo(false);
             produtoRepository.save(produto);
-            throw new ProductInactivatedException("Produto não pode ser excluído pois possui vendas associadas. Produto inativado.");
+            throw new ProdutoInativoException("Produto não pode ser excluído pois possui vendas associadas. Produto inativado.");
         }
 
         produtoRepository.delete(produto);
+        return produto;
     }
 }

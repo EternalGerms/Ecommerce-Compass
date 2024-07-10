@@ -1,30 +1,34 @@
-let currentProductSortField = "id"; // Inicializa variável para ordenação de produtos
-let currentVendaSortField = "id"; // Inicializa variável para ordenação de vendas
+let currentVendaSortField = "id"; // Campo inicial para ordenação das vendas
+let vendaSortDirection = "asc"; // Direção inicial da ordenação das vendas
 
-let productSortDirection = 1; // Direção inicial da ordenação de produtos
-let vendaSortDirection = 1; // Direção inicial da ordenação de vendas
+let currentSortField = "id"; // Campo inicial para ordenação
+let currentSortDirection = "asc"; // Direção inicial da ordenação
 
 // Função para ordenar produtos
 function sortProducts(field) {
-  if (field === currentProductSortField) {
-    productSortDirection = -productSortDirection; // Inverte a direção da ordenação se clicar no mesmo campo
-  } else {
-    currentProductSortField = field;
-    productSortDirection = 1; // Começa com ordenação crescente ao clicar em um novo campo
+    if (currentSortField === field) {
+      // Inverte a direção se o mesmo campo for clicado novamente
+      currentSortDirection = currentSortDirection === "asc" ? "desc" : "asc";
+    } else {
+      // Define o novo campo e direção inicial
+      currentSortField = field;
+      currentSortDirection = "asc";
+    }
+    loadProducts(); // Recarrega os produtos com a nova ordenação
   }
-  loadProducts(); // Recarrega os produtos com a nova ordenação
-}
 
 // Função para ordenar vendas
 function sortVendas(field) {
-  if (field === currentVendaSortField) {
-    vendaSortDirection = -vendaSortDirection; // Inverte a direção da ordenação se clicar no mesmo campo
-  } else {
-    currentVendaSortField = field;
-    vendaSortDirection = 1; // Começa com ordenação crescente ao clicar em um novo campo
+    if (currentVendaSortField === field) {
+      // Inverte a direção se o mesmo campo for clicado novamente
+      vendaSortDirection = vendaSortDirection === "asc" ? "desc" : "asc";
+    } else {
+      // Define o novo campo e direção inicial
+      currentVendaSortField = field;
+      vendaSortDirection = "asc";
+    }
+    loadVendas(); // Recarrega as vendas com a nova ordenação
   }
-  loadVendas(); // Recarrega as vendas com a nova ordenação
-}
 
 // Função para carregar produtos
 function loadProducts() {
@@ -52,11 +56,12 @@ function loadProducts() {
         }
   
         if (!Array.isArray(data)) {
-          console.error("Dados de produtos não estão no formato esperado. Formato recebido:", typeof data, data);
+          console.error("Dados de produtos não estão no formato esperado. Tipo recebido:", typeof data);
+          console.error("Dados recebidos:", data);
           const errorRow = document.createElement("tr");
           const errorCell = document.createElement("td");
           errorCell.colSpan = 6;
-          errorCell.innerText = "Erro ao carregar produtos: formato de dados inesperado. Por favor, verifique o console para mais detalhes.";
+          errorCell.innerText = "Erro ao carregar produtos: formato de dados inesperado.";
           errorRow.appendChild(errorCell);
           productList.appendChild(errorRow);
           return;
@@ -72,13 +77,15 @@ function loadProducts() {
         } else {
           // Ordena os produtos com base no campo e direção atuais
           data.sort((a, b) => {
-            const fieldA = a[currentProductSortField];
-            const fieldB = b[currentProductSortField];
+            const fieldA = a[currentSortField];
+            const fieldB = b[currentSortField];
   
-            if (typeof fieldA === "string") {
-              return productSortDirection * fieldA.localeCompare(fieldB);
+            if (fieldA < fieldB) {
+              return currentSortDirection === "asc" ? -1 : 1;
+            } else if (fieldA > fieldB) {
+              return currentSortDirection === "asc" ? 1 : -1;
             } else {
-              return productSortDirection * (fieldA - fieldB);
+              return 0;
             }
           });
   
@@ -97,7 +104,7 @@ function loadProducts() {
   
             // Coluna Estoque
             const estoqueCell = document.createElement("td");
-            estoqueCell.innerText = product.estoque; // Garante que o estoque seja um número inteiro
+            estoqueCell.innerText = product.estoque;
             row.appendChild(estoqueCell);
   
             // Coluna Preço
@@ -105,7 +112,7 @@ function loadProducts() {
             precoCell.innerText = product.preco.toLocaleString("pt-BR", {
               style: "currency",
               currency: "BRL",
-            }); // Formata o preço como moeda
+            });
             row.appendChild(precoCell);
   
             // Coluna Ativo
@@ -145,34 +152,47 @@ function loadProducts() {
   }
 
 function editProduct(product) {
-  document.getElementById("editProductId").value = product.id;
-  document.getElementById("editProductName").value = product.nome;
-  document.getElementById("editProductStock").value = product.estoque;
-  document.getElementById("editProductPrice").value = product.preco;
-}
+    document.getElementById("editProductId").value = product.id;
+    document.getElementById("editProductName").value = product.nome;
+    document.getElementById("editProductStock").value = product.estoque;
+    document.getElementById("editProductPrice").value = product.preco;
+    document.getElementById("editProductActive").checked = product.ativo;
+  }
 
 function deleteProduct(productId) {
-  if (confirm("Tem certeza que deseja excluir este produto?")) {
-    fetch(`/api/produtos/${productId}`, {
-      method: "DELETE",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          return response.json().then((error) => {
-            throw new Error(error.message || "Erro ao excluir produto");
-          });
-        }
-        loadProducts(); // Refresh the product list after deleting a product
+    if (confirm("Tem certeza que deseja excluir este produto?")) {
+      fetch(`/api/produtos/${productId}`, {
+        method: "DELETE",
       })
-      .catch((error) => {
-        alert("Erro ao excluir produto: " + error.message);
-      });
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((error) => {
+              throw new Error(error.message || "Erro ao excluir produto");
+            });
+          }
+          return response.json();
+        })
+        .then((data) => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Produto Excluído',
+            text: 'Produto excluído com sucesso.',
+          });
+          loadProducts(); // Recarrega a lista de produtos após a exclusão
+        })
+        .catch((error) => {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Produto Inativado',
+            text: error.message,
+          });
+          loadProducts(); // Recarrega a lista de produtos após a inativação
+        });
+    }
   }
-}
 
 // Função para carregar vendas
 function loadVendas() {
-    console.log("Carregando vendas..."); // Log para depuração
     fetch("/api/vendas")
       .then((response) => {
         if (!response.ok) {
@@ -183,30 +203,16 @@ function loadVendas() {
         return response.json();
       })
       .then((data) => {
-        console.log("Dados de vendas recebidos:", data); // Log para depuração
         const vendaList = document.getElementById("vendaList");
-        if (!vendaList) {
-          console.error("Elemento vendaList não encontrado no DOM");
-          return;
-        }
         vendaList.innerHTML = ""; // Limpa a lista antes de adicionar as novas vendas
   
-        if (data.code === 204) {
-          const noDataRow = document.createElement("tr");
-          const noDataCell = document.createElement("td");
-          noDataCell.colSpan = 5; // Colspan para ocupar todas as colunas da tabela
-          noDataCell.innerText = "Nenhuma venda encontrada.";
-          noDataRow.appendChild(noDataCell);
-          vendaList.appendChild(noDataRow);
-          return;
-        }
-  
         if (!Array.isArray(data)) {
-          console.error("Dados de vendas não estão no formato esperado. Formato recebido:", typeof data, data);
+          console.error("Dados de vendas não estão no formato esperado. Tipo recebido:", typeof data);
+          console.error("Dados recebidos:", data);
           const errorRow = document.createElement("tr");
           const errorCell = document.createElement("td");
           errorCell.colSpan = 5;
-          errorCell.innerText = "Erro ao carregar vendas: formato de dados inesperado. Por favor, verifique o console para mais detalhes.";
+          errorCell.innerText = "Erro ao carregar vendas: formato de dados inesperado.";
           errorRow.appendChild(errorCell);
           vendaList.appendChild(errorRow);
           return;
@@ -225,10 +231,12 @@ function loadVendas() {
             const fieldA = a[currentVendaSortField];
             const fieldB = b[currentVendaSortField];
   
-            if (typeof fieldA === "string") {
-              return vendaSortDirection * fieldA.localeCompare(fieldB);
+            if (fieldA < fieldB) {
+              return vendaSortDirection === "asc" ? -1 : 1;
+            } else if (fieldA > fieldB) {
+              return vendaSortDirection === "asc" ? 1 : -1;
             } else {
-              return vendaSortDirection * (fieldA - fieldB);
+              return 0;
             }
           });
   
@@ -276,10 +284,6 @@ function loadVendas() {
       .catch((error) => {
         console.log("Erro ao carregar vendas:", error);
         const vendaList = document.getElementById("vendaList");
-        if (!vendaList) {
-          console.error("Elemento vendaList não encontrado no DOM");
-          return;
-        }
         vendaList.innerHTML = ""; // Limpa a lista em caso de erro
         const errorRow = document.createElement("tr");
         const errorCell = document.createElement("td");
@@ -370,6 +374,7 @@ document
     const productName = document.getElementById("editProductName").value;
     const productStock = document.getElementById("editProductStock").value;
     const productPrice = document.getElementById("editProductPrice").value;
+    const productActive = document.getElementById("editProductActive").checked;
 
     fetch(`/api/produtos/${productId}`, {
       method: "PUT",
@@ -380,6 +385,7 @@ document
         nome: productName,
         estoque: productStock,
         preco: productPrice,
+        ativo: productActive,
       }),
     })
       .then((response) => {
@@ -516,6 +522,13 @@ document
         const filterVendasTableBody = document.querySelector(
           "#filterVendasTable tbody"
         );
+        
+        // Verifica se o elemento existe
+        if (!filterVendasTableBody) {
+          console.error("Elemento #filterVendasTable tbody não encontrado no DOM");
+          return;
+        }
+
         filterVendasTableBody.innerHTML = ""; // Clear previous results
         if (data.length === 0) {
           const noDataRow = document.createElement("tr");

@@ -7,6 +7,7 @@ import com.ecommerce.ecomm.exception.InvalidDateException;
 import com.ecommerce.ecomm.exception.InvalidQuantityException;
 import com.ecommerce.ecomm.exception.NoContentException;
 import com.ecommerce.ecomm.exception.NoSalesInPeriodException;
+import com.ecommerce.ecomm.exception.ProdutoInativoException;
 import com.ecommerce.ecomm.exception.VendaNotFoundException;
 import com.ecommerce.ecomm.model.ErrorResponse;
 import com.ecommerce.ecomm.service.VendaService;
@@ -44,6 +45,8 @@ public class VendaController {
         } catch (ResourceNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse(404, "Not Found", e.getMessage()), HttpStatus.NOT_FOUND);
         } catch (InsufficientStockException e) {
+            return new ResponseEntity<>(new ErrorResponse(400, "Bad Request", e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (ProdutoInativoException e) {
             return new ResponseEntity<>(new ErrorResponse(400, "Bad Request", e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse(500, "Internal Server Error", "Ocorreu um erro inesperado"), HttpStatus.INTERNAL_SERVER_ERROR);

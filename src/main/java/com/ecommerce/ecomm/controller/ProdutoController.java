@@ -18,7 +18,7 @@ import com.ecommerce.ecomm.dto.ProdutoDTO;
 import com.ecommerce.ecomm.entities.Produto;
 import com.ecommerce.ecomm.exception.InvalidProductException;
 import com.ecommerce.ecomm.exception.NoContentException;
-import com.ecommerce.ecomm.exception.ProductInactivatedException;
+import com.ecommerce.ecomm.exception.ProdutoInativoException;
 import com.ecommerce.ecomm.model.ErrorResponse;
 import com.ecommerce.ecomm.service.ProdutoService;
 
@@ -70,11 +70,11 @@ public class ProdutoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarProduto(@PathVariable Long id) {
         try {
-            produtoService.deletarProduto(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            Produto produtoAtualizado = produtoService.deletarProduto(id);
+            return new ResponseEntity<>(produtoAtualizado, HttpStatus.OK);
         } catch (ResourceNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse(404, "Not Found", e.getMessage()), HttpStatus.NOT_FOUND);
-        } catch (ProductInactivatedException e) {
+        } catch (ProdutoInativoException e) {
             return new ResponseEntity<>(new ErrorResponse(400, "Bad Request", e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }

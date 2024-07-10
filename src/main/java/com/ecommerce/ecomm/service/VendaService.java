@@ -16,6 +16,7 @@ import com.ecommerce.ecomm.exception.InvalidDateException;
 import com.ecommerce.ecomm.exception.InvalidQuantityException;
 import com.ecommerce.ecomm.exception.NoContentException;
 import com.ecommerce.ecomm.exception.NoSalesInPeriodException;
+import com.ecommerce.ecomm.exception.ProdutoInativoException;
 import com.ecommerce.ecomm.exception.VendaNotFoundException;
 import com.ecommerce.ecomm.repository.ProdutoRepository;
 import com.ecommerce.ecomm.repository.VendaRepository;
@@ -37,11 +38,11 @@ public class VendaService {
             .orElseThrow(() -> new ResourceNotFoundException("Produto com ID " + vendaDTO.getIdProduto() + " não encontrado."));
 
         if (!produto.isAtivo()) {
-            throw new IllegalArgumentException("Não é possível criar uma venda para um produto inativo.");
+            throw new ProdutoInativoException("Não é possível criar uma venda para um produto inativo.");
         }
 
         if (vendaDTO.getQuantidade() <= 0) {
-            throw new IllegalArgumentException("A quantidade da venda deve ser maior que zero.");
+            throw new InvalidQuantityException("A quantidade da venda deve ser maior que zero.");
         }
 
         if (produto.getEstoque() < vendaDTO.getQuantidade()) {
