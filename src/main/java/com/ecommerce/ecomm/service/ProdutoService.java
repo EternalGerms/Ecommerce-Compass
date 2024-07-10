@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.ecommerce.ecomm.dto.ProdutoDTO;
 import com.ecommerce.ecomm.entities.Produto;
 import com.ecommerce.ecomm.entities.Venda;
 import com.ecommerce.ecomm.exception.InvalidProductException;
@@ -45,22 +46,33 @@ public class ProdutoService {
         return produtos;
     }
 
-    public Produto atualizarProduto(Long id, @Valid Produto produto) {
+    public Produto atualizarProduto(Long id, @Valid ProdutoDTO produtoUpdateDTO) {
         Produto produtoExistente = produtoRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
 
-        if (produto.getEstoque() < 0) {
+        if (produtoUpdateDTO.getEstoque() != null && produtoUpdateDTO.getEstoque() < 0) {
             throw new InvalidProductException("O estoque não pode ser negativo");
         }
 
-        if (produto.getPreco() < 0) {
+        if (produtoUpdateDTO.getPreco() != null && produtoUpdateDTO.getPreco() < 0) {
             throw new InvalidProductException("O preço não pode ser negativo");
         }
 
-        produtoExistente.setNome(produto.getNome());
-        produtoExistente.setEstoque(produto.getEstoque());
-        produtoExistente.setPreco(produto.getPreco());
-        produtoExistente.setAtivo(produto.isAtivo());
+        if (produtoUpdateDTO.getNome() != null) {
+            produtoExistente.setNome(produtoUpdateDTO.getNome());
+        }
+
+        if (produtoUpdateDTO.getEstoque() != null) {
+            produtoExistente.setEstoque(produtoUpdateDTO.getEstoque());
+        }
+
+        if (produtoUpdateDTO.getPreco() != null) {
+            produtoExistente.setPreco(produtoUpdateDTO.getPreco());
+        }
+
+        if (produtoUpdateDTO.isAtivo() != null) {
+            produtoExistente.setAtivo(produtoUpdateDTO.isAtivo());
+        }
 
         return produtoRepository.save(produtoExistente);
     }

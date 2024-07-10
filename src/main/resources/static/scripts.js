@@ -28,102 +28,121 @@ function sortVendas(field) {
 
 // Função para carregar produtos
 function loadProducts() {
-  fetch("/api/produtos")
-    .then((response) => {
-      if (!response.ok) {
-        return response.json().then((error) => {
-          throw new Error(error.message || "Erro ao carregar produtos");
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      const productList = document.getElementById("productList");
-      productList.innerHTML = ""; // Limpa a lista antes de adicionar os novos produtos
-
-      if (data.length === 0) {
-        const noDataRow = document.createElement("tr");
-        const noDataCell = document.createElement("td");
-        noDataCell.colSpan = 6; // Colspan para ocupar todas as colunas da tabela
-        noDataCell.innerText = "Nenhum produto encontrado.";
-        noDataRow.appendChild(noDataCell);
-        productList.appendChild(noDataRow);
-      } else {
-        // Ordena os produtos com base no campo e direção atuais
-        data.sort((a, b) => {
-          const fieldA = a[currentProductSortField];
-          const fieldB = b[currentProductSortField];
-
-          if (typeof fieldA === "string") {
-            return productSortDirection * fieldA.localeCompare(fieldB);
-          } else {
-            return productSortDirection * (fieldA - fieldB);
-          }
-        });
-
-        data.forEach((product) => {
-          const row = document.createElement("tr");
-
-          // Coluna ID
-          const idCell = document.createElement("td");
-          idCell.innerText = product.id;
-          row.appendChild(idCell);
-
-          // Coluna Nome
-          const nomeCell = document.createElement("td");
-          nomeCell.innerText = product.nome;
-          row.appendChild(nomeCell);
-
-          // Coluna Estoque
-          const estoqueCell = document.createElement("td");
-          estoqueCell.innerText = product.estoque; // Garante que o estoque seja um número inteiro
-          row.appendChild(estoqueCell);
-
-          // Coluna Preço
-          const precoCell = document.createElement("td");
-          precoCell.innerText = product.preco.toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-          }); // Formata o preço como moeda
-          row.appendChild(precoCell);
-
-          // Coluna Ativo
-          const ativoCell = document.createElement("td");
-          ativoCell.innerText = product.ativo ? "Sim" : "Não";
-          row.appendChild(ativoCell);
-
-          // Coluna Ações
-          const acoesCell = document.createElement("td");
-          const editButton = document.createElement("button");
-          editButton.innerText = "Editar";
-          editButton.addEventListener("click", () => editProduct(product));
-          acoesCell.appendChild(editButton);
-
-          const deleteButton = document.createElement("button");
-          deleteButton.innerText = "Excluir";
-          deleteButton.addEventListener("click", () =>
-            deleteProduct(product.id)
-          );
-          acoesCell.appendChild(deleteButton);
-
-          row.appendChild(acoesCell);
-
-          productList.appendChild(row);
-        });
-      }
-    })
-    .catch((error) => {
-      console.log("Erro ao carregar produtos:", error);
-      const productList = document.getElementById("productList");
-      productList.innerHTML = ""; // Limpa a lista em caso de erro
-      const errorRow = document.createElement("tr");
-      const errorCell = document.createElement("td");
-      errorCell.colSpan = 6;
-      errorCell.innerText = "Erro ao carregar produtos: " + error.message;
-      errorRow.appendChild(errorCell);
-      productList.appendChild(errorRow);
-    });
-}
+    fetch("/api/produtos")
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((error) => {
+            throw new Error(error.message || "Erro ao carregar produtos");
+          });
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const productList = document.getElementById("productList");
+        productList.innerHTML = ""; // Limpa a lista antes de adicionar os novos produtos
+  
+        if (data.code === 204) {
+          const noDataRow = document.createElement("tr");
+          const noDataCell = document.createElement("td");
+          noDataCell.colSpan = 6; // Colspan para ocupar todas as colunas da tabela
+          noDataCell.innerText = "Nenhum produto encontrado.";
+          noDataRow.appendChild(noDataCell);
+          productList.appendChild(noDataRow);
+          return;
+        }
+  
+        if (!Array.isArray(data)) {
+          console.error("Dados de produtos não estão no formato esperado. Formato recebido:", typeof data, data);
+          const errorRow = document.createElement("tr");
+          const errorCell = document.createElement("td");
+          errorCell.colSpan = 6;
+          errorCell.innerText = "Erro ao carregar produtos: formato de dados inesperado. Por favor, verifique o console para mais detalhes.";
+          errorRow.appendChild(errorCell);
+          productList.appendChild(errorRow);
+          return;
+        }
+  
+        if (data.length === 0) {
+          const noDataRow = document.createElement("tr");
+          const noDataCell = document.createElement("td");
+          noDataCell.colSpan = 6; // Colspan para ocupar todas as colunas da tabela
+          noDataCell.innerText = "Nenhum produto encontrado.";
+          noDataRow.appendChild(noDataCell);
+          productList.appendChild(noDataRow);
+        } else {
+          // Ordena os produtos com base no campo e direção atuais
+          data.sort((a, b) => {
+            const fieldA = a[currentProductSortField];
+            const fieldB = b[currentProductSortField];
+  
+            if (typeof fieldA === "string") {
+              return productSortDirection * fieldA.localeCompare(fieldB);
+            } else {
+              return productSortDirection * (fieldA - fieldB);
+            }
+          });
+  
+          data.forEach((product) => {
+            const row = document.createElement("tr");
+  
+            // Coluna ID
+            const idCell = document.createElement("td");
+            idCell.innerText = product.id;
+            row.appendChild(idCell);
+  
+            // Coluna Nome
+            const nomeCell = document.createElement("td");
+            nomeCell.innerText = product.nome;
+            row.appendChild(nomeCell);
+  
+            // Coluna Estoque
+            const estoqueCell = document.createElement("td");
+            estoqueCell.innerText = product.estoque; // Garante que o estoque seja um número inteiro
+            row.appendChild(estoqueCell);
+  
+            // Coluna Preço
+            const precoCell = document.createElement("td");
+            precoCell.innerText = product.preco.toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }); // Formata o preço como moeda
+            row.appendChild(precoCell);
+  
+            // Coluna Ativo
+            const ativoCell = document.createElement("td");
+            ativoCell.innerText = product.ativo ? "Sim" : "Não";
+            row.appendChild(ativoCell);
+  
+            // Coluna Ações
+            const acoesCell = document.createElement("td");
+            const editButton = document.createElement("button");
+            editButton.innerText = "Editar";
+            editButton.addEventListener("click", () => editProduct(product));
+            acoesCell.appendChild(editButton);
+  
+            const deleteButton = document.createElement("button");
+            deleteButton.innerText = "Excluir";
+            deleteButton.addEventListener("click", () => deleteProduct(product.id));
+            acoesCell.appendChild(deleteButton);
+  
+            row.appendChild(acoesCell);
+  
+            productList.appendChild(row);
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("Erro ao carregar produtos:", error);
+        const productList = document.getElementById("productList");
+        productList.innerHTML = ""; // Limpa a lista em caso de erro
+        const errorRow = document.createElement("tr");
+        const errorCell = document.createElement("td");
+        errorCell.colSpan = 6;
+        errorCell.innerText = "Erro ao carregar produtos: " + error.message;
+        errorRow.appendChild(errorCell);
+        productList.appendChild(errorRow);
+      });
+  }
 
 function editProduct(product) {
   document.getElementById("editProductId").value = product.id;
@@ -153,102 +172,123 @@ function deleteProduct(productId) {
 
 // Função para carregar vendas
 function loadVendas() {
-  console.log("Carregando vendas..."); // Log para depuração
-  fetch("/api/vendas")
-    .then((response) => {
-      if (!response.ok) {
-        return response.json().then((error) => {
-          throw new Error(error.message || "Erro ao carregar vendas");
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      console.log("Dados de vendas recebidos:", data); // Log para depuração
-      const vendaList = document.getElementById("vendaList");
-      if (!vendaList) {
-        console.error("Elemento vendaList não encontrado no DOM");
-        return;
-      }
-      vendaList.innerHTML = ""; // Limpa a lista antes de adicionar as novas vendas
-
-      if (data.length === 0) {
-        const noDataRow = document.createElement("tr");
-        const noDataCell = document.createElement("td");
-        noDataCell.colSpan = 5; // Colspan para ocupar todas as colunas da tabela
-        noDataCell.innerText = "Nenhuma venda encontrada.";
-        noDataRow.appendChild(noDataCell);
-        vendaList.appendChild(noDataRow);
-      } else {
-        // Ordena as vendas com base no campo e direção atuais
-        data.sort((a, b) => {
-          const fieldA = a[currentVendaSortField];
-          const fieldB = b[currentVendaSortField];
-
-          if (typeof fieldA === "string") {
-            return vendaSortDirection * fieldA.localeCompare(fieldB);
-          } else {
-            return vendaSortDirection * (fieldA - fieldB);
-          }
-        });
-
-        data.forEach((venda) => {
-          const row = document.createElement("tr");
-
-          // Coluna ID
-          const idCell = document.createElement("td");
-          idCell.innerText = venda.id;
-          row.appendChild(idCell);
-
-          // Coluna ID do Produto
-          const productIdCell = document.createElement("td");
-          productIdCell.innerText = venda["id-produto"];
-          row.appendChild(productIdCell);
-
-          // Coluna Quantidade
-          const quantidadeCell = document.createElement("td");
-          quantidadeCell.innerText = venda.quantidade;
-          row.appendChild(quantidadeCell);
-
-          // Coluna Data da Venda
-          const dataVendaCell = document.createElement("td");
-          dataVendaCell.innerText = venda.dataVenda;
-          row.appendChild(dataVendaCell);
-
-          // Coluna Ações
-          const acoesCell = document.createElement("td");
-          const editButton = document.createElement("button");
-          editButton.innerText = "Editar";
-          editButton.addEventListener("click", () => editVenda(venda));
-          acoesCell.appendChild(editButton);
-
-          const deleteButton = document.createElement("button");
-          deleteButton.innerText = "Excluir";
-          deleteButton.addEventListener("click", () => deleteVenda(venda.id));
-          acoesCell.appendChild(deleteButton);
-
-          row.appendChild(acoesCell);
-
-          vendaList.appendChild(row);
-        });
-      }
-    })
-    .catch((error) => {
-      console.log("Erro ao carregar vendas:", error);
-      const vendaList = document.getElementById("vendaList");
-      if (!vendaList) {
-        console.error("Elemento vendaList não encontrado no DOM");
-        return;
-      }
-      vendaList.innerHTML = ""; // Limpa a lista em caso de erro
-      const errorRow = document.createElement("tr");
-      const errorCell = document.createElement("td");
-      errorCell.colSpan = 5;
-      errorCell.innerText = "Erro ao carregar vendas: " + error.message;
-      errorRow.appendChild(errorCell);
-      vendaList.appendChild(errorRow);
-    });
-}
+    console.log("Carregando vendas..."); // Log para depuração
+    fetch("/api/vendas")
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((error) => {
+            throw new Error(error.message || "Erro ao carregar vendas");
+          });
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Dados de vendas recebidos:", data); // Log para depuração
+        const vendaList = document.getElementById("vendaList");
+        if (!vendaList) {
+          console.error("Elemento vendaList não encontrado no DOM");
+          return;
+        }
+        vendaList.innerHTML = ""; // Limpa a lista antes de adicionar as novas vendas
+  
+        if (data.code === 204) {
+          const noDataRow = document.createElement("tr");
+          const noDataCell = document.createElement("td");
+          noDataCell.colSpan = 5; // Colspan para ocupar todas as colunas da tabela
+          noDataCell.innerText = "Nenhuma venda encontrada.";
+          noDataRow.appendChild(noDataCell);
+          vendaList.appendChild(noDataRow);
+          return;
+        }
+  
+        if (!Array.isArray(data)) {
+          console.error("Dados de vendas não estão no formato esperado. Formato recebido:", typeof data, data);
+          const errorRow = document.createElement("tr");
+          const errorCell = document.createElement("td");
+          errorCell.colSpan = 5;
+          errorCell.innerText = "Erro ao carregar vendas: formato de dados inesperado. Por favor, verifique o console para mais detalhes.";
+          errorRow.appendChild(errorCell);
+          vendaList.appendChild(errorRow);
+          return;
+        }
+  
+        if (data.length === 0) {
+          const noDataRow = document.createElement("tr");
+          const noDataCell = document.createElement("td");
+          noDataCell.colSpan = 5; // Colspan para ocupar todas as colunas da tabela
+          noDataCell.innerText = "Nenhuma venda encontrada.";
+          noDataRow.appendChild(noDataCell);
+          vendaList.appendChild(noDataRow);
+        } else {
+          // Ordena as vendas com base no campo e direção atuais
+          data.sort((a, b) => {
+            const fieldA = a[currentVendaSortField];
+            const fieldB = b[currentVendaSortField];
+  
+            if (typeof fieldA === "string") {
+              return vendaSortDirection * fieldA.localeCompare(fieldB);
+            } else {
+              return vendaSortDirection * (fieldA - fieldB);
+            }
+          });
+  
+          data.forEach((venda) => {
+            const row = document.createElement("tr");
+  
+            // Coluna ID
+            const idCell = document.createElement("td");
+            idCell.innerText = venda.id;
+            row.appendChild(idCell);
+  
+            // Coluna ID do Produto
+            const productIdCell = document.createElement("td");
+            productIdCell.innerText = venda["id-produto"];
+            row.appendChild(productIdCell);
+  
+            // Coluna Quantidade
+            const quantidadeCell = document.createElement("td");
+            quantidadeCell.innerText = venda.quantidade;
+            row.appendChild(quantidadeCell);
+  
+            // Coluna Data da Venda
+            const dataVendaCell = document.createElement("td");
+            dataVendaCell.innerText = venda.dataVenda;
+            row.appendChild(dataVendaCell);
+  
+            // Coluna Ações
+            const acoesCell = document.createElement("td");
+            const editButton = document.createElement("button");
+            editButton.innerText = "Editar";
+            editButton.addEventListener("click", () => editVenda(venda));
+            acoesCell.appendChild(editButton);
+  
+            const deleteButton = document.createElement("button");
+            deleteButton.innerText = "Excluir";
+            deleteButton.addEventListener("click", () => deleteVenda(venda.id));
+            acoesCell.appendChild(deleteButton);
+  
+            row.appendChild(acoesCell);
+  
+            vendaList.appendChild(row);
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("Erro ao carregar vendas:", error);
+        const vendaList = document.getElementById("vendaList");
+        if (!vendaList) {
+          console.error("Elemento vendaList não encontrado no DOM");
+          return;
+        }
+        vendaList.innerHTML = ""; // Limpa a lista em caso de erro
+        const errorRow = document.createElement("tr");
+        const errorCell = document.createElement("td");
+        errorCell.colSpan = 5;
+        errorCell.innerText = "Erro ao carregar vendas: " + error.message;
+        errorRow.appendChild(errorCell);
+        vendaList.appendChild(errorRow);
+      });
+  }
 
 function editVenda(venda) {
   document.getElementById("editVendaId").value = venda.id;
@@ -302,20 +342,27 @@ document
         preco: productPrice,
       }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((error) => {
+            throw new Error(`${error.code}: ${error.message}`);
+          });
+        }
+        return response.json();
+      })
       .then((data) => {
         document.getElementById("createProductResult").innerText =
           "Produto criado com sucesso!";
         loadProducts(); // Refresh the product list after creating a new product
       })
       .catch((error) => {
-        alert("Erro ao criar produto: " + error.message);
-        document.getElementById("createProductResult").innerText =
-          "Erro: " + error.message;
+        const errorMessage = `Erro ${error.message}`;
+        alert(errorMessage);
+        document.getElementById("createProductResult").innerText = errorMessage;
       });
   });
 
-document
+  document
   .getElementById("editProductForm")
   .addEventListener("submit", function (e) {
     e.preventDefault();
@@ -335,20 +382,27 @@ document
         preco: productPrice,
       }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((error) => {
+            throw new Error(`${error.code}: ${error.message}`);
+          });
+        }
+        return response.json();
+      })
       .then((data) => {
         document.getElementById("editProductResult").innerText =
           "Produto atualizado com sucesso!";
         loadProducts(); // Refresh the product list after updating a product
       })
       .catch((error) => {
-        alert("Erro ao editar produto: " + error.message);
-        document.getElementById("editProductResult").innerText =
-          "Erro: " + error.message;
+        const errorMessage = `Erro ${error.message}`;
+        alert(errorMessage);
+        document.getElementById("editProductResult").innerText = errorMessage;
       });
   });
 
-document
+  document
   .getElementById("createVendaForm")
   .addEventListener("submit", function (e) {
     e.preventDefault();
@@ -373,7 +427,7 @@ document
       .then((response) => {
         if (!response.ok) {
           return response.json().then((error) => {
-            throw new Error(error.message || "Erro ao criar venda");
+            throw new Error(`${error.code}: ${error.message}`);
           });
         }
         return response.json();
@@ -388,13 +442,13 @@ document
         document.getElementById("vendaData").value = "";
       })
       .catch((error) => {
-        alert("Erro ao criar venda: " + error.message);
-        document.getElementById("createVendaResult").innerText =
-          "Erro: " + error.message;
+        const errorMessage = `Erro ${error.message}`;
+        alert(errorMessage);
+        document.getElementById("createVendaResult").innerText = errorMessage;
       });
   });
 
-document
+  document
   .getElementById("editVendaForm")
   .addEventListener("submit", function (e) {
     e.preventDefault();
@@ -418,35 +472,25 @@ document
       }),
     })
       .then((response) => {
-        console.log("Data sent:", {
-          idProduto: productId,
-          quantidade: quantidade,
-          dataVenda: formattedDataVenda,
-        });
-        console.log("Response status:", response.status);
         if (!response.ok) {
           return response.json().then((error) => {
-            console.error("Server error:", error);
-            throw new Error(error.message || "Erro ao editar venda");
+            throw new Error(`${error.code}: ${error.message}`);
           });
         }
         return response.json();
       })
       .then((data) => {
-        console.log("Data received:", data);
         document.getElementById("editVendaResult").innerText =
           "Venda atualizada com sucesso!";
         loadVendas(); // Refresh the sales list after updating a sale
       })
       .catch((error) => {
-        console.error("Error:", error);
-        alert("Erro ao editar venda: " + error.message);
-        document.getElementById("editVendaResult").innerText =
-          "Erro: " + error.message;
+        const errorMessage = `Erro ${error.message}`;
+        alert(errorMessage);
+        document.getElementById("editVendaResult").innerText = errorMessage;
       });
   });
-
-document
+  document
   .getElementById("filterVendasForm")
   .addEventListener("submit", function (e) {
     e.preventDefault();
@@ -463,7 +507,7 @@ document
       .then((response) => {
         if (!response.ok) {
           return response.json().then((error) => {
-            throw new Error(error.message || "Erro ao filtrar vendas");
+            throw new Error(`${error.code}: ${error.message}`);
           });
         }
         return response.json();
@@ -504,13 +548,13 @@ document
         }
       })
       .catch((error) => {
-        alert("Erro ao filtrar vendas: " + error.message);
+        const errorMessage = `Erro ${error.message}`;
+        alert(errorMessage);
         const filterVendasResult =
           document.getElementById("filterVendasResult");
-        filterVendasResult.innerText = "Erro: " + error.message;
+        filterVendasResult.innerText = errorMessage;
       });
   });
-
 // Variáveis para ordenação dos relatórios
 let currentMonthlyReportSortField = "data";
 let currentWeeklyReportSortField = "data";
@@ -674,14 +718,14 @@ function loadWeeklyReport() {
       });
   }
 
-document
+  document
   .getElementById("monthlyReportForm")
   .addEventListener("submit", function (e) {
     e.preventDefault();
     loadMonthlyReport();
   });
 
-document
+  document
   .getElementById("weeklyReportForm")
   .addEventListener("submit", function (e) {
     e.preventDefault();

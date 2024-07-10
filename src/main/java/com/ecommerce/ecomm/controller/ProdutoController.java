@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ecommerce.ecomm.dto.ProdutoDTO;
 import com.ecommerce.ecomm.entities.Produto;
 import com.ecommerce.ecomm.exception.InvalidProductException;
 import com.ecommerce.ecomm.exception.NoContentException;
@@ -55,9 +56,9 @@ public class ProdutoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizarProduto(@PathVariable Long id, @Valid @RequestBody Produto produto) {
+    public ResponseEntity<?> atualizarProduto(@PathVariable Long id, @Valid @RequestBody ProdutoDTO produtoUpdateDTO) {
         try {
-            Produto produtoAtualizado = produtoService.atualizarProduto(id, produto);
+            Produto produtoAtualizado = produtoService.atualizarProduto(id, produtoUpdateDTO);
             return new ResponseEntity<>(produtoAtualizado, HttpStatus.OK);
         } catch (ResourceNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse(404, "Not Found", e.getMessage()), HttpStatus.NOT_FOUND);
