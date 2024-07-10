@@ -82,12 +82,6 @@ management.endpoints.web.exposure.include=*
 
 A aplicação estará disponível em `http://localhost:8080`.
 
-### Documentação da API
-
-A documentação da API pode ser acessada através do Swagger UI quando a aplicação estiver em execução. Acesse `http://localhost:8080/swagger-ui.html` para visualizar e testar os endpoints.
-
-### Contribuição
-
 Contribuições são bem-vindas! Por favor, abra uma issue ou envie um pull request para contribuir com o projeto.
 
 ### Licença
