@@ -74,4 +74,6 @@ class ErrorResponse {
                 ", message='" + message + '\'' +
                 '}';
     }
+    
+    
 }

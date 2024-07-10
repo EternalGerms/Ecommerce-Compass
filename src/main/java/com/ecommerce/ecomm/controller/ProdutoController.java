@@ -2,6 +2,7 @@ package com.ecommerce.ecomm.controller;
 
 import java.util.List;
 
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ecommerce.ecomm.entities.Produto;
+import com.ecommerce.ecomm.exception.InvalidProductException;
+import com.ecommerce.ecomm.exception.NoContentException;
+import com.ecommerce.ecomm.exception.ProductInactivatedException;
+import com.ecommerce.ecomm.model.ErrorResponse;
 import com.ecommerce.ecomm.service.ProdutoService;
 
 import jakarta.validation.Valid;
@@ -28,20 +33,25 @@ public class ProdutoController {
         this.produtoService = produtoService;
     }
 
+    
     @PostMapping
     public ResponseEntity<?> criarProduto(@Valid @RequestBody Produto produto) {
         try {
             Produto novoProduto = produtoService.criarProduto(produto);
             return new ResponseEntity<>(novoProduto, HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (InvalidProductException e) {
+            return new ResponseEntity<>(new ErrorResponse(400, "Bad Request", e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
-
+    
     @GetMapping
-    public ResponseEntity<List<Produto>> listarProdutos() {
-        List<Produto> produtos = produtoService.listarProdutos();
-        return new ResponseEntity<>(produtos, HttpStatus.OK);
+    public ResponseEntity<?> listarProdutos() {
+        try {
+            List<Produto> produtos = produtoService.listarProdutos();
+            return new ResponseEntity<>(produtos, HttpStatus.OK);
+        } catch (NoContentException e) {
+            return new ResponseEntity<>(new ErrorResponse(204, "No Content", e.getMessage()), HttpStatus.OK);
+        }
     }
 
     @PutMapping("/{id}")
@@ -49,8 +59,10 @@ public class ProdutoController {
         try {
             Produto produtoAtualizado = produtoService.atualizarProduto(id, produto);
             return new ResponseEntity<>(produtoAtualizado, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(new ErrorResponse(404, "Not Found", e.getMessage()), HttpStatus.NOT_FOUND);
+        } catch (InvalidProductException e) {
+            return new ResponseEntity<>(new ErrorResponse(400, "Bad Request", e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -59,8 +71,10 @@ public class ProdutoController {
         try {
             produtoService.deletarProduto(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(new ErrorResponse(404, "Not Found", e.getMessage()), HttpStatus.NOT_FOUND);
+        } catch (ProductInactivatedException e) {
+            return new ResponseEntity<>(new ErrorResponse(400, "Bad Request", e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 }
