@@ -11,7 +11,7 @@ public class ErrorResponse {
         this.message = message;
     }
 
-    // Getters and setters
+    // Getters e Setters
 
     public int getCode() {
         return code;
@@ -35,5 +35,14 @@ public class ErrorResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return "ErrorResponse{" +
+                "code=" + code +
+                ", status='" + status + '\'' +
+                ", message='" + message + '\'' +
+                '}';
     }
 }

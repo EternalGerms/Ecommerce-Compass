@@ -7,19 +7,13 @@ import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.ecomm.dto.VendaDTO;
 import com.ecommerce.ecomm.entities.Produto;
 import com.ecommerce.ecomm.entities.Venda;
-import com.ecommerce.ecomm.exception.InsufficientStockException;
-import com.ecommerce.ecomm.exception.InvalidDateException;
-import com.ecommerce.ecomm.exception.InvalidQuantityException;
-import com.ecommerce.ecomm.exception.NoContentException;
-import com.ecommerce.ecomm.exception.NoSalesInPeriodException;
-import com.ecommerce.ecomm.exception.ProdutoInativoException;
-import com.ecommerce.ecomm.exception.VendaNotFoundException;
+import com.ecommerce.ecomm.exception.EcommException;
+import com.ecommerce.ecomm.exception.ErrorCode;
 import com.ecommerce.ecomm.repository.ProdutoRepository;
 import com.ecommerce.ecomm.repository.VendaRepository;
 
@@ -38,24 +32,23 @@ public class VendaService {
     @CacheEvict(value = "vendas", allEntries = true)
     public Venda criarVenda(VendaDTO vendaDTO) {
         Produto produto = produtoRepository.findById(vendaDTO.getIdProduto())
-            .orElseThrow(() -> new ResourceNotFoundException("Produto com ID " + vendaDTO.getIdProduto() + " não encontrado."));
+            .orElseThrow(() -> new EcommException(ErrorCode.PRODUCT_NOT_FOUND));
 
         if (!produto.isAtivo()) {
-            throw new ProdutoInativoException("Não é possível criar uma venda para um produto inativo.");
+            throw new EcommException(ErrorCode.PRODUTO_INATIVO_SALES);
         }
 
         if (vendaDTO.getQuantidade() <= 0) {
-            throw new InvalidQuantityException("A quantidade da venda deve ser maior que zero.");
+            throw new EcommException(ErrorCode.INVALID_SALES_QUANTITY);
         }
 
         if (produto.getEstoque() < vendaDTO.getQuantidade()) {
-            throw new InsufficientStockException("Estoque insuficiente para o produto: " + produto.getNome());
+            throw new EcommException(ErrorCode.INSUFFICIENT_STOCK);
         }
 
         try {
-            LocalDateTime dataVenda = LocalDateTime.parse(vendaDTO.getDataVenda().toString(), dateTimeFormatter);
         } catch (DateTimeParseException e) {
-            throw new InvalidDateException("Data da venda inválida ou no formato errado. O formato esperado é: " + dateTimeFormatter.toString());
+            throw new EcommException(ErrorCode.INVALID_DATE);
         }
 
         produto.setEstoque(produto.getEstoque() - vendaDTO.getQuantidade());
@@ -73,7 +66,7 @@ public class VendaService {
     public List<Venda> listarVendas() {
         List<Venda> vendas = vendaRepository.findAll();
         if (vendas.isEmpty()) {
-            throw new NoContentException("Nenhuma venda disponível.");
+            throw new EcommException(ErrorCode.NO_SALES_AVAILABLE);
         }
         return vendas;
     }
@@ -81,17 +74,17 @@ public class VendaService {
     @CacheEvict(value = "vendas", allEntries = true)
     public Venda atualizarVenda(Long id, VendaDTO vendaDTO) {
         Venda vendaExistente = vendaRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Venda não encontrada"));
+            .orElseThrow(() -> new EcommException(ErrorCode.VENDA_NOT_FOUND));
 
         Produto produto = produtoRepository.findById(vendaDTO.getIdProduto())
-            .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
+            .orElseThrow(() -> new EcommException(ErrorCode.VENDA_NOT_FOUND));
 
         if (vendaDTO.getQuantidade() <= 0) {
-            throw new InvalidQuantityException("A quantidade da venda deve ser maior que zero.");
+            throw new EcommException(ErrorCode.INVALID_SALES_QUANTITY);
         }
 
         if (produto.getEstoque() + vendaExistente.getQuantidade() < vendaDTO.getQuantidade()) {
-            throw new InvalidQuantityException("Estoque insuficiente para o produto: " + produto.getNome());
+            throw new EcommException(ErrorCode.INVALID_SALES_QUANTITY);
         }
 
         produto.setEstoque(produto.getEstoque() + vendaExistente.getQuantidade() - vendaDTO.getQuantidade());
@@ -108,7 +101,7 @@ public class VendaService {
     @CacheEvict(value = "vendas", allEntries = true)
     public void deletarVenda(Long id) {
         Venda venda = vendaRepository.findById(id)
-            .orElseThrow(() -> new VendaNotFoundException("Venda com ID " + id + " não encontrada."));
+            .orElseThrow(() -> new EcommException(ErrorCode.VENDA_NOT_FOUND));
 
         Produto produto = venda.getProduto();
         produto.setEstoque(produto.getEstoque() + venda.getQuantidade());
@@ -121,7 +114,7 @@ public class VendaService {
     public List<Venda> filtrarVendasPorData(LocalDateTime startDate, LocalDateTime endDate) {
         List<Venda> vendas = vendaRepository.findByDataVendaBetween(startDate, endDate);
         if (vendas.isEmpty()) {
-            throw new NoSalesInPeriodException("Nenhuma venda encontrada no período selecionado.");
+            throw new EcommException(ErrorCode.NO_SALES_IN_PERIOD);
         }
         return vendas;
     }
@@ -132,7 +125,7 @@ public class VendaService {
         LocalDateTime endDate = mesAno.withDayOfMonth(mesAno.toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59);
         List<Venda> vendas = vendaRepository.findByDataVendaBetween(startDate, endDate);
         if (vendas.isEmpty()) {
-            throw new NoSalesInPeriodException("Nenhuma venda encontrada no período mensal selecionado.");
+            throw new EcommException(ErrorCode.NO_SALES_IN_PERIOD);
         }
         return vendas;
     }
@@ -143,7 +136,7 @@ public class VendaService {
         LocalDateTime endDate = semana.with(java.time.DayOfWeek.SUNDAY).withHour(23).withMinute(59).withSecond(59);
         List<Venda> vendas = vendaRepository.findByDataVendaBetween(startDate, endDate);
         if (vendas.isEmpty()) {
-            throw new NoSalesInPeriodException("Nenhuma venda encontrada no período semanal selecionado.");
+            throw new EcommException(ErrorCode.NO_SALES_IN_PERIOD);
         }
         return vendas;
     }

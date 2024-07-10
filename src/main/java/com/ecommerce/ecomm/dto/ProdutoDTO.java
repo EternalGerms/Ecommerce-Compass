@@ -1,12 +1,27 @@
 package com.ecommerce.ecomm.dto;
 
+import com.ecommerce.ecomm.entities.Produto;
+
 public class ProdutoDTO {
     private String nome;
     private Double preco;
     private Integer estoque;
     private Boolean ativo; // Campo opcional para ativo/inativo
+    
+   
+    public ProdutoDTO(String nome, Double preco, Integer estoque, Boolean ativo) {
+		super();
+		this.nome = nome;
+		this.preco = preco;
+		this.estoque = estoque;
+		this.ativo = ativo;
+	}
 
-    // Getters e Setters
+	public ProdutoDTO(Produto produto) {
+		// TODO Auto-generated constructor stub
+	}
+
+	// Getters e Setters
     public String getNome() {
         return nome;
     }

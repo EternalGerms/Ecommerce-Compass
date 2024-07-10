@@ -3,15 +3,13 @@ package com.ecommerce.ecomm.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.ecomm.dto.ProdutoDTO;
 import com.ecommerce.ecomm.entities.Produto;
 import com.ecommerce.ecomm.entities.Venda;
-import com.ecommerce.ecomm.exception.InvalidProductException;
-import com.ecommerce.ecomm.exception.NoContentException;
-import com.ecommerce.ecomm.exception.ProdutoInativoException;
+import com.ecommerce.ecomm.exception.EcommException;
+import com.ecommerce.ecomm.exception.ErrorCode;
 import com.ecommerce.ecomm.repository.ProdutoRepository;
 import com.ecommerce.ecomm.repository.VendaRepository;
 
@@ -28,11 +26,11 @@ public class ProdutoService {
 
     public Produto criarProduto(@Valid Produto produto) {
         if (produto.getEstoque() < 0) {
-            throw new InvalidProductException("O estoque não pode ser negativo");
+            throw new EcommException(ErrorCode.INVALID_PRODUCT_STOCK);
         }
 
         if (produto.getPreco() < 0) {
-            throw new InvalidProductException("O preço não pode ser negativo");
+            throw new EcommException(ErrorCode.INVALID_PRODUCT_PRICE);
         }
 
         return produtoRepository.save(produto);
@@ -41,21 +39,21 @@ public class ProdutoService {
     public List<Produto> listarProdutos() {
         List<Produto> produtos = produtoRepository.findAll();
         if (produtos.isEmpty()) {
-            throw new NoContentException("Nenhum produto disponível.");
+            throw new EcommException(ErrorCode.NO_PRODUCTS_AVAILABLE);
         }
         return produtos;
     }
 
     public Produto atualizarProduto(Long id, @Valid ProdutoDTO produtoUpdateDTO) {
         Produto produtoExistente = produtoRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
+            .orElseThrow(() -> new EcommException(ErrorCode.PRODUCT_NOT_FOUND));
 
         if (produtoUpdateDTO.getEstoque() != null && produtoUpdateDTO.getEstoque() < 0) {
-            throw new InvalidProductException("O estoque não pode ser negativo");
+            throw new EcommException(ErrorCode.INVALID_PRODUCT_STOCK);
         }
 
         if (produtoUpdateDTO.getPreco() != null && produtoUpdateDTO.getPreco() < 0) {
-            throw new InvalidProductException("O preço não pode ser negativo");
+            throw new EcommException(ErrorCode.INVALID_PRODUCT_PRICE);
         }
 
         if (produtoUpdateDTO.getNome() != null) {
@@ -77,23 +75,30 @@ public class ProdutoService {
         return produtoRepository.save(produtoExistente);
     }
 
-    public Produto deletarProduto(Long id) {
+    public void deletarProduto(Long id) {
         Produto produto = produtoRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
-
-        if (!produto.isAtivo()) {
-            throw new ProdutoInativoException("Produto já está inativo e não pode ser excluído.");
-        }
+            .orElseThrow(() -> new EcommException(ErrorCode.PRODUCT_NOT_FOUND));
 
         List<Venda> vendas = vendaRepository.findByProdutoId(id);
+        System.out.println("Vendas associadas: " + vendas.size()); // Adicione este log para depuração
 
-        if (!vendas.isEmpty()) {
-            produto.setAtivo(false);
-            produtoRepository.save(produto);
-            throw new ProdutoInativoException("Produto não pode ser excluído pois possui vendas associadas. Produto inativado.");
+        if (produto.isAtivo()) {
+            if (vendas.isEmpty()) {
+                System.out.println("Excluindo produto: " + produto.getId()); // Adicione este log para depuração
+                produtoRepository.delete(produto);
+            } else {
+                System.out.println("Inativando produto: " + produto.getId()); // Adicione este log para depuração
+                produto.setAtivo(false);
+                produtoRepository.save(produto);
+                throw new EcommException(ErrorCode.PRODUTO_INATIVO);
+            }
+        } else {
+            if (vendas.isEmpty()) {
+                System.out.println("Excluindo produto: " + produto.getId()); // Adicione este log para depuração
+                produtoRepository.delete(produto);
+            } else {
+                throw new EcommException(ErrorCode.PRODUTO_INATIVO);
+            }
         }
-
-        produtoRepository.delete(produto);
-        return produto;
     }
 }
