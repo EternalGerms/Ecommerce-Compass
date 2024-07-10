@@ -5,6 +5,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,7 @@ public class VendaService {
         this.produtoRepository = produtoRepository;
     }
 
+    @CacheEvict(value = "vendas", allEntries = true)
     public Venda criarVenda(VendaDTO vendaDTO) {
         Produto produto = produtoRepository.findById(vendaDTO.getIdProduto())
             .orElseThrow(() -> new ResourceNotFoundException("Produto com ID " + vendaDTO.getIdProduto() + " não encontrado."));
@@ -66,6 +69,7 @@ public class VendaService {
         return vendaRepository.save(venda);
     }
 
+    @Cacheable("vendas")
     public List<Venda> listarVendas() {
         List<Venda> vendas = vendaRepository.findAll();
         if (vendas.isEmpty()) {
@@ -74,6 +78,7 @@ public class VendaService {
         return vendas;
     }
 
+    @CacheEvict(value = "vendas", allEntries = true)
     public Venda atualizarVenda(Long id, VendaDTO vendaDTO) {
         Venda vendaExistente = vendaRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Venda não encontrada"));
@@ -100,6 +105,7 @@ public class VendaService {
         return vendaRepository.save(vendaExistente);
     }
 
+    @CacheEvict(value = "vendas", allEntries = true)
     public void deletarVenda(Long id) {
         Venda venda = vendaRepository.findById(id)
             .orElseThrow(() -> new VendaNotFoundException("Venda com ID " + id + " não encontrada."));
@@ -111,6 +117,7 @@ public class VendaService {
         vendaRepository.delete(venda);
     }
 
+    @Cacheable("vendas")
     public List<Venda> filtrarVendasPorData(LocalDateTime startDate, LocalDateTime endDate) {
         List<Venda> vendas = vendaRepository.findByDataVendaBetween(startDate, endDate);
         if (vendas.isEmpty()) {
@@ -119,6 +126,7 @@ public class VendaService {
         return vendas;
     }
 
+    @Cacheable("vendas")
     public List<Venda> gerarRelatorioMensal(LocalDateTime mesAno) {
         LocalDateTime startDate = mesAno.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
         LocalDateTime endDate = mesAno.withDayOfMonth(mesAno.toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59);
@@ -129,6 +137,7 @@ public class VendaService {
         return vendas;
     }
 
+    @Cacheable("vendas")
     public List<Venda> gerarRelatorioSemanal(LocalDateTime semana) {
         LocalDateTime startDate = semana.with(java.time.DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0);
         LocalDateTime endDate = semana.with(java.time.DayOfWeek.SUNDAY).withHour(23).withMinute(59).withSecond(59);
