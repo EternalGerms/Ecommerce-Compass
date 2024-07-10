@@ -81,9 +81,3 @@ management.endpoints.web.exposure.include=*
    ```
 
 A aplicação estará disponível em `http://localhost:8080`.
-
-Contribuições são bem-vindas! Por favor, abra uma issue ou envie um pull request para contribuir com o projeto.
-
-### Licença
-
-Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
