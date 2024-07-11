@@ -6,6 +6,7 @@
 
 O projeto está organizado em pacotes que seguem as melhores práticas de desenvolvimento com Spring Boot:
 
+
 - `com.ecommerce.ecomm.config`: Contém configurações da aplicação, como configuração de cache.
 - `com.ecommerce.ecomm.controller`: Contém os controladores que lidam com as requisições HTTP.
 - `com.ecommerce.ecomm.dto`: Contém os Data Transfer Objects (DTOs) utilizados para transferência de dados entre camadas.
@@ -81,3 +82,7 @@ management.endpoints.web.exposure.include=*
    ```
 
 A aplicação estará disponível em `http://localhost:8080`.
+
+### Diagrama ER
+
+![NO_12i8m38RlVOgym5x0qv1T10-2u5NY6aQXQxOs4MJptQtTYc1F___JvClV9i4eEdf3GPoyu1BPgZ0i1l8xSnZ0sQAl4brsWKSg_XI41ef0INZMBUjO7vvWYjHp2OxCdZ00YdkoUPkAkL6m-0-fUjfkk9Vi1veLyx15I_lN7ds7Gc1Hi2py0cg1TMqQNdRG0IPEIPrfiyrjFm00](https://github.com/EternalGerms/Ecommerce-Compass/assets/119995136/d1a68c12-75d6-42e4-af43-5fbc33e4c6c3)
