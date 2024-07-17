@@ -12,20 +12,22 @@ import com.ecommerce.ecomm.model.ErrorResponse;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(EcommException.class)
-    public ResponseEntity<ErrorResponse> handleEcommException(EcommException ex) {
-        ErrorCode errorCode = ex.getErrorCode();
-        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.getStatus(), errorCode.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(errorCode.getCode()));
-    }
+	@ExceptionHandler(EcommException.class)
+	public ResponseEntity<ErrorResponse> handleEcommException(EcommException ex) {
+		ErrorCode errorCode = ex.getErrorCode();
+		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.getStatus(),
+				errorCode.getMessage());
+		return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(errorCode.getCode()));
+	}
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
-        logger.error("Exception caught: ", ex);
-        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
-        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.getStatus(), errorCode.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+		logger.error("Exception caught: ", ex);
+		ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.getStatus(),
+				errorCode.getMessage());
+		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
 }

@@ -25,49 +25,57 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/produtos")
 public class ProdutoController {
 
-    private final ProdutoService produtoService;
+	private final ProdutoService produtoService;
 
-    public ProdutoController(ProdutoService produtoService) {
-        this.produtoService = produtoService;
-    }
+	public ProdutoController(ProdutoService produtoService) {
+		this.produtoService = produtoService;
+	}
 
-    @PostMapping
-    public ResponseEntity<?> criarProduto(@Valid @RequestBody Produto produto) {
-        try {
-            Produto novoProduto = produtoService.criarProduto(produto);
-            return new ResponseEntity<>(novoProduto, HttpStatus.CREATED);
-        } catch (EcommException e) {
-            return new ResponseEntity<>(new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getStatus(), e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
-    }
+	@PostMapping
+	public ResponseEntity<?> criarProduto(@Valid @RequestBody Produto produto) {
+		try {
+			Produto novoProduto = produtoService.criarProduto(produto);
+			return new ResponseEntity<>(novoProduto, HttpStatus.CREATED);
+		} catch (EcommException e) {
+			return new ResponseEntity<>(
+					new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getStatus(), e.getMessage()),
+					HttpStatus.BAD_REQUEST);
+		}
+	}
 
-    @GetMapping
-    public ResponseEntity<?> listarProdutos() {
-        try {
-            List<Produto> produtos = produtoService.listarProdutos();
-            return new ResponseEntity<>(produtos, HttpStatus.OK);
-        } catch (EcommException e) {
-            return new ResponseEntity<>(new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getStatus(), e.getMessage()), HttpStatus.OK);
-        }
-    }
+	@GetMapping
+	public ResponseEntity<?> listarProdutos() {
+		try {
+			List<Produto> produtos = produtoService.listarProdutos();
+			return new ResponseEntity<>(produtos, HttpStatus.OK);
+		} catch (EcommException e) {
+			return new ResponseEntity<>(
+					new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getStatus(), e.getMessage()),
+					HttpStatus.OK);
+		}
+	}
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> atualizarProduto(@PathVariable Long id, @Valid @RequestBody ProdutoDTO produtoUpdateDTO) {
-        try {
-            Produto produtoAtualizado = produtoService.atualizarProduto(id, produtoUpdateDTO);
-            return new ResponseEntity<>(produtoAtualizado, HttpStatus.OK);
-        } catch (EcommException e) {
-            return new ResponseEntity<>(new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getStatus(), e.getMessage()), HttpStatus.valueOf(e.getErrorCode().getCode()));
-        }
-    }
+	@PutMapping("/{id}")
+	public ResponseEntity<?> atualizarProduto(@PathVariable Long id, @Valid @RequestBody ProdutoDTO produtoUpdateDTO) {
+		try {
+			Produto produtoAtualizado = produtoService.atualizarProduto(id, produtoUpdateDTO);
+			return new ResponseEntity<>(produtoAtualizado, HttpStatus.OK);
+		} catch (EcommException e) {
+			return new ResponseEntity<>(
+					new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getStatus(), e.getMessage()),
+					HttpStatus.valueOf(e.getErrorCode().getCode()));
+		}
+	}
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletarProduto(@PathVariable Long id) {
-        try {
-            produtoService.deletarProduto(id);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (EcommException e) {
-            return new ResponseEntity<>(new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getStatus(), e.getMessage()), HttpStatus.valueOf(e.getErrorCode().getCode()));
-        }
-    }
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deletarProduto(@PathVariable Long id) {
+		try {
+			produtoService.deletarProduto(id);
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (EcommException e) {
+			return new ResponseEntity<>(
+					new ErrorResponse(e.getErrorCode().getCode(), e.getErrorCode().getStatus(), e.getMessage()),
+					HttpStatus.valueOf(e.getErrorCode().getCode()));
+		}
+	}
 }

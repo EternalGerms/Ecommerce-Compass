@@ -18,87 +18,87 @@ import jakarta.validation.Valid;
 @Service
 public class ProdutoService {
 
-    @Autowired
-    private ProdutoRepository produtoRepository;
+	@Autowired
+	private ProdutoRepository produtoRepository;
 
-    @Autowired
-    private VendaRepository vendaRepository;
+	@Autowired
+	private VendaRepository vendaRepository;
 
-    public Produto criarProduto(@Valid Produto produto) {
-        if (produto.getEstoque() < 0) {
-            throw new EcommException(ErrorCode.INVALID_PRODUCT_STOCK);
-        }
+	public Produto criarProduto(@Valid Produto produto) {
+		if (produto.getEstoque() < 0) {
+			throw new EcommException(ErrorCode.INVALID_PRODUCT_STOCK);
+		}
 
-        if (produto.getPreco() < 0) {
-            throw new EcommException(ErrorCode.INVALID_PRODUCT_PRICE);
-        }
+		if (produto.getPreco() < 0) {
+			throw new EcommException(ErrorCode.INVALID_PRODUCT_PRICE);
+		}
 
-        return produtoRepository.save(produto);
-    }
+		return produtoRepository.save(produto);
+	}
 
-    public List<Produto> listarProdutos() {
-        List<Produto> produtos = produtoRepository.findAll();
-        if (produtos.isEmpty()) {
-            throw new EcommException(ErrorCode.NO_PRODUCTS_AVAILABLE);
-        }
-        return produtos;
-    }
+	public List<Produto> listarProdutos() {
+		List<Produto> produtos = produtoRepository.findAll();
+		if (produtos.isEmpty()) {
+			throw new EcommException(ErrorCode.NO_PRODUCTS_AVAILABLE);
+		}
+		return produtos;
+	}
 
-    public Produto atualizarProduto(Long id, @Valid ProdutoDTO produtoUpdateDTO) {
-        Produto produtoExistente = produtoRepository.findById(id)
-            .orElseThrow(() -> new EcommException(ErrorCode.PRODUCT_NOT_FOUND));
+	public Produto atualizarProduto(Long id, @Valid ProdutoDTO produtoUpdateDTO) {
+		Produto produtoExistente = produtoRepository.findById(id)
+				.orElseThrow(() -> new EcommException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        if (produtoUpdateDTO.getEstoque() != null && produtoUpdateDTO.getEstoque() < 0) {
-            throw new EcommException(ErrorCode.INVALID_PRODUCT_STOCK);
-        }
+		if (produtoUpdateDTO.getEstoque() != null && produtoUpdateDTO.getEstoque() < 0) {
+			throw new EcommException(ErrorCode.INVALID_PRODUCT_STOCK);
+		}
 
-        if (produtoUpdateDTO.getPreco() != null && produtoUpdateDTO.getPreco() < 0) {
-            throw new EcommException(ErrorCode.INVALID_PRODUCT_PRICE);
-        }
+		if (produtoUpdateDTO.getPreco() != null && produtoUpdateDTO.getPreco() < 0) {
+			throw new EcommException(ErrorCode.INVALID_PRODUCT_PRICE);
+		}
 
-        if (produtoUpdateDTO.getNome() != null) {
-            produtoExistente.setNome(produtoUpdateDTO.getNome());
-        }
+		if (produtoUpdateDTO.getNome() != null) {
+			produtoExistente.setNome(produtoUpdateDTO.getNome());
+		}
 
-        if (produtoUpdateDTO.getEstoque() != null) {
-            produtoExistente.setEstoque(produtoUpdateDTO.getEstoque());
-        }
+		if (produtoUpdateDTO.getEstoque() != null) {
+			produtoExistente.setEstoque(produtoUpdateDTO.getEstoque());
+		}
 
-        if (produtoUpdateDTO.getPreco() != null) {
-            produtoExistente.setPreco(produtoUpdateDTO.getPreco());
-        }
+		if (produtoUpdateDTO.getPreco() != null) {
+			produtoExistente.setPreco(produtoUpdateDTO.getPreco());
+		}
 
-        if (produtoUpdateDTO.isAtivo() != null) {
-            produtoExistente.setAtivo(produtoUpdateDTO.isAtivo());
-        }
+		if (produtoUpdateDTO.isAtivo() != null) {
+			produtoExistente.setAtivo(produtoUpdateDTO.isAtivo());
+		}
 
-        return produtoRepository.save(produtoExistente);
-    }
+		return produtoRepository.save(produtoExistente);
+	}
 
-    public void deletarProduto(Long id) {
-        Produto produto = produtoRepository.findById(id)
-            .orElseThrow(() -> new EcommException(ErrorCode.PRODUCT_NOT_FOUND));
+	public void deletarProduto(Long id) {
+		Produto produto = produtoRepository.findById(id)
+				.orElseThrow(() -> new EcommException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        List<Venda> vendas = vendaRepository.findByProdutoId(id);
-        System.out.println("Vendas associadas: " + vendas.size()); // Adicione este log para depuração
+		List<Venda> vendas = vendaRepository.findByProdutoId(id);
+		System.out.println("Vendas associadas: " + vendas.size()); // Adicione este log para depuração
 
-        if (produto.isAtivo()) {
-            if (vendas.isEmpty()) {
-                System.out.println("Excluindo produto: " + produto.getId()); // Adicione este log para depuração
-                produtoRepository.delete(produto);
-            } else {
-                System.out.println("Inativando produto: " + produto.getId()); // Adicione este log para depuração
-                produto.setAtivo(false);
-                produtoRepository.save(produto);
-                throw new EcommException(ErrorCode.PRODUTO_INATIVO);
-            }
-        } else {
-            if (vendas.isEmpty()) {
-                System.out.println("Excluindo produto: " + produto.getId()); // Adicione este log para depuração
-                produtoRepository.delete(produto);
-            } else {
-                throw new EcommException(ErrorCode.PRODUTO_INATIVO);
-            }
-        }
-    }
+		if (produto.isAtivo()) {
+			if (vendas.isEmpty()) {
+				System.out.println("Excluindo produto: " + produto.getId()); // Adicione este log para depuração
+				produtoRepository.delete(produto);
+			} else {
+				System.out.println("Inativando produto: " + produto.getId()); // Adicione este log para depuração
+				produto.setAtivo(false);
+				produtoRepository.save(produto);
+				throw new EcommException(ErrorCode.PRODUTO_INATIVO);
+			}
+		} else {
+			if (vendas.isEmpty()) {
+				System.out.println("Excluindo produto: " + produto.getId()); // Adicione este log para depuração
+				produtoRepository.delete(produto);
+			} else {
+				throw new EcommException(ErrorCode.PRODUTO_INATIVO);
+			}
+		}
+	}
 }

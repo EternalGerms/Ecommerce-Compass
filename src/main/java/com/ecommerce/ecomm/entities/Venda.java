@@ -19,70 +19,83 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "venda")
 public class Venda {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "produto_id")
-    @JsonBackReference
-    private Produto produto;
+	@ManyToOne
+	@JoinColumn(name = "produto_id")
+	@JsonBackReference
+	private Produto produto;
 
-    private Integer quantidade;
+	private Integer quantidade;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private LocalDateTime dataVenda;
-    
-    @JsonProperty("id-produto")
-    private Long idProduto;
-    
-    @PrePersist
-    @PreUpdate
-    private void prePersistUpdate() {
-        if (produto != null) {
-            this.idProduto = produto.getId();
-        }
-    }
-    
-    // Getters e Setters
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+	private LocalDateTime dataVenda;
 
-    public Long getId() {
-        return id;
-    }
+	@JsonProperty("id-produto")
+	private Long idProduto;
+	
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private User user; // Adicione este campo para registrar o usuário
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	@PrePersist
+	@PreUpdate
+	private void prePersistUpdate() {
+		if (produto != null) {
+			this.idProduto = produto.getId();
+		}
+	}
 
-    public Produto getProduto() {
-        return produto;
-    }
+	// Getters e Setters
 
-    public void setProduto(Produto produto) {
-        this.produto = produto;
-    }
+	public User getUser() {
+		return user;
+	}
 
-    public Integer getQuantidade() {
-        return quantidade;
-    }
+	public void setUser(User user) {
+		this.user = user;
+	}
 
-    public void setQuantidade(Integer quantidade) {
-        this.quantidade = quantidade;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public LocalDateTime getDataVenda() {
-        return dataVenda;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setDataVenda(LocalDateTime dataVenda) {
-        this.dataVenda = dataVenda;
-    }
+	public Produto getProduto() {
+		return produto;
+	}
 
-    public Long getIdProduto() {
-        return idProduto;
-    }
+	public void setProduto(Produto produto) {
+		this.produto = produto;
+	}
 
-    public void setIdProduto(Long idProduto) {
-        this.idProduto = idProduto;
-    }
+	public Integer getQuantidade() {
+		return quantidade;
+	}
+
+	public void setQuantidade(Integer quantidade) {
+		this.quantidade = quantidade;
+	}
+
+	public LocalDateTime getDataVenda() {
+		return dataVenda;
+	}
+
+	public void setDataVenda(LocalDateTime dataVenda) {
+		this.dataVenda = dataVenda;
+	}
+
+	public Long getIdProduto() {
+		return idProduto;
+	}
+
+	public void setIdProduto(Long idProduto) {
+		this.idProduto = idProduto;
+	}
+
 }

@@ -15,75 +15,73 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "produto")
 public class Produto {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(nullable = false)
-    private String nome;
+	@Column(nullable = false)
+	private String nome;
 
-    @Column(nullable = false)
-    private Double preco;
+	@Column(nullable = false)
+	private Double preco;
 
-    @Column(nullable = false)
-    private Integer estoque = 0;
+	@Column(nullable = false)
+	private Integer estoque = 0;
 
-    private boolean ativo = true;
+	private boolean ativo = true;
 
-    @ManyToMany(mappedBy = "produto")
-    @JsonManagedReference
-    private List<Venda> vendas;
-    
+	@ManyToMany(mappedBy = "produto")
+	@JsonManagedReference
+	private List<Venda> vendas;
 
 	// Getters e Setters
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public String getNome() {
-        return nome;
-    }
+	public String getNome() {
+		return nome;
+	}
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
 
-    public Double getPreco() {
-        return preco;
-    }
+	public Double getPreco() {
+		return preco;
+	}
 
-    public void setPreco(Double preco) {
-        this.preco = preco;
-    }
+	public void setPreco(Double preco) {
+		this.preco = preco;
+	}
 
-    public Integer getEstoque() {
-        return estoque;
-    }
+	public Integer getEstoque() {
+		return estoque;
+	}
 
-    public void setEstoque(Integer estoque) {
-        this.estoque = estoque;
-    }
+	public void setEstoque(Integer estoque) {
+		this.estoque = estoque;
+	}
 
-    public boolean isAtivo() {
-        return ativo;
-    }
+	public boolean isAtivo() {
+		return ativo;
+	}
 
-    public void setAtivo(boolean ativo) {
-        this.ativo = ativo;
-    }
+	public void setAtivo(boolean ativo) {
+		this.ativo = ativo;
+	}
 
-    public List<Venda> getVendas() {
-        return vendas;
-    }
+	public List<Venda> getVendas() {
+		return vendas;
+	}
 
-    public void setVendas(List<Venda> vendas) {
-        this.vendas = vendas;
-    }
-    
-    
+	public void setVendas(List<Venda> vendas) {
+		this.vendas = vendas;
+	}
+
 }
