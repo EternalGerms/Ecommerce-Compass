@@ -29,9 +29,9 @@ public class PasswordResetService {
     private PasswordEncoder passwordEncoder;
 
     public void createPasswordResetTokenForUser(String email) {
-        User user = userRepository.findByEmail(email);
+    	User user = userRepository.findByEmail(email);
         if (user == null) {
-        	throw new EcommException(ErrorCode.PRODUTO_INATIVO);
+            throw new EcommException(ErrorCode.EMAIL_NOT_FOUND);
         }
         String token = UUID.randomUUID().toString();
         PasswordResetToken myToken = new PasswordResetToken(token, user);
@@ -55,5 +55,4 @@ public class PasswordResetService {
         Calendar cal = Calendar.getInstance();
         return token.getExpiryDate().before(cal.getTime());
     }
-    
 }

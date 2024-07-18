@@ -15,12 +15,12 @@ public class PasswordResetController {
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ResetPasswordRequest request) {
         passwordResetService.createPasswordResetTokenForUser(request.getEmail());
-        return ResponseEntity.ok("Password reset link has been sent to your email.");
+        return ResponseEntity.ok("Token de alteração de senha enviado para o email cadastrado.");
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
         passwordResetService.resetPassword(request.getToken(), request.getNewPassword());
-        return ResponseEntity.ok("Password has been reset successfully.");
+        return ResponseEntity.ok("Senha alterada com sucesso.");
     }
 }

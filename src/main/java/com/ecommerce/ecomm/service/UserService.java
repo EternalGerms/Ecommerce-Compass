@@ -13,6 +13,8 @@ import com.ecommerce.ecomm.entities.PasswordResetToken;
 import com.ecommerce.ecomm.entities.Permission;
 import com.ecommerce.ecomm.entities.Role;
 import com.ecommerce.ecomm.entities.User;
+import com.ecommerce.ecomm.exception.EcommException;
+import com.ecommerce.ecomm.exception.ErrorCode;
 import com.ecommerce.ecomm.repository.PasswordResetTokenRepository;
 import com.ecommerce.ecomm.repository.PermissionRepository;
 import com.ecommerce.ecomm.repository.RoleRepository;
@@ -43,6 +45,12 @@ public class UserService {
 		Role role = roleRepository.findByName(request.getRole());
 		if (role == null) {
 			throw new RuntimeException("Role not found: " + request.getRole());
+		}
+		if (userRepository.findByUsername(request.getUsername()) != null) {
+	        throw new EcommException(ErrorCode.USERNAME_ALREADY_EXISTS);
+		}
+		if (request.getUsername() == null || request.getPassword() == null || request.getEmail() == null) {
+	        throw new EcommException(ErrorCode.INVALID_REGISTRATION);
 		}
 
 		User user = new User();
@@ -89,7 +97,7 @@ public class UserService {
 			String token = UUID.randomUUID().toString();
 			PasswordResetToken passwordResetToken = new PasswordResetToken(token, user);
 			passwordResetTokenRepository.save(passwordResetToken);
-			emailService.sendEmail(email, "Password Reset", "Your password reset token is: " + token);
+			emailService.sendEmail(email, "Recuperação de senha", "Seu token de recuperação é: " + token);
 		}
 	}
 
@@ -99,13 +107,13 @@ public class UserService {
 			User user = passwordResetToken.getUser();
 			Calendar cal = Calendar.getInstance();
 			if ((passwordResetToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
-				throw new RuntimeException("Token expired");
+				throw new RuntimeException("Token expirado");
 			}
 			user.setPassword(passwordEncoder.encode(newPassword));
 			userRepository.save(user);
 			passwordResetTokenRepository.delete(passwordResetToken);
 		} else {
-			throw new RuntimeException("Invalid token");
+			throw new RuntimeException("Token inválido");
 		}
 	}
 }
