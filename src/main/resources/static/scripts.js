@@ -11,26 +11,76 @@ function getAuthToken() {
 // Função para adicionar o token ao cabeçalho das requisições
 function fetchWithAuth(url, options = {}) {
     const token = getAuthToken();
-    console.log("Token:", token); // Log the token for debugging
     if (token) {
         options.headers = {
             ...options.headers,
             'Authorization': `Bearer ${token}`
         };
     }
-    return fetch(url, options);
+    return fetch(url, options).then(response => {
+        if (!response) {
+            throw new Error('Network response was not ok');
+        }
+        if (response.status === 401) {
+            console.error('Unauthorized');
+            // Aqui você pode adicionar lógica para redirecionar para a página de login ou mostrar uma mensagem ao usuário
+            return null;
+        }
+        return response.json();
+    });
 }
 
+
 function handleFetchError(response) {
-    if (!response.ok) {
-        return response.json().then(error => {
-            throw new Error(error.message || "Something went wrong");
-        });
-    }
-    return response.json();
+	if (!response.ok) {
+		return response.json().then(error => {
+			throw new Error(error.message || "Something went wrong");
+		});
+	}
+	return response.json();
 }
 
 document.getElementById('login-btn').addEventListener('click', () => {
+    Swal.fire({
+        title: 'Login',
+        html: `
+            <input id="login-username" class="swal2-input" placeholder="Username">
+            <input id="login-password" class="swal2-input" type="password" placeholder="Password">
+        `,
+        confirmButtonText: 'Login',
+        preConfirm: () => {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            return { username: username, password: password };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('http://localhost:8080/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(result.value)
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            }).then(data => {
+                const token = data.token;
+                localStorage.setItem('authToken', token);
+                document.getElementById('username').innerText = result.value.username;
+                document.getElementById('user-info').style.display = 'block';
+                Swal.fire('Logged in successfully!');
+                loadProducts();
+                loadVendas();
+            }).catch(error => {
+                console.error('Error during login:', error);
+                Swal.fire('Error', 'Login failed: ' + error.message, 'error');
+            });
+        }
+    });
+});
 	Swal.fire({
 		title: 'Login',
 		html: `
@@ -55,28 +105,26 @@ document.getElementById('login-btn').addEventListener('click', () => {
 				if (!response.ok) {
 					throw new Error(`HTTP error! status: ${response.status}`);
 				}
-				return response.json(); // Use response.json()
+				return response.json();
 			}).then(data => {
-				// Assuming the server returns a JSON with the token
 				const token = data.token;
 				localStorage.setItem('authToken', token);
 				document.getElementById('username').innerText = result.value.username;
 				document.getElementById('user-info').style.display = 'block';
 				Swal.fire('Logged in successfully!');
-				loadProducts(); // Recarregar produtos após o login
-				loadVendas(); // Recarregar vendas após o login
+				loadProducts();
+				loadVendas();
 			}).catch(error => {
 				console.error('Error during login:', error);
 				Swal.fire('Error', 'Login failed: ' + error.message, 'error');
 			});
 		}
 	});
-});
 
 document.getElementById('register-btn').addEventListener('click', () => {
-    Swal.fire({
-        title: 'Register',
-        html: `
+	Swal.fire({
+		title: 'Register',
+		html: `
             <input id="register-username" class="swal2-input" placeholder="Username">
             <input id="register-password" class="swal2-input" type="password" placeholder="Password">
             <input id="register-email" class="swal2-input" placeholder="Email">
@@ -85,34 +133,34 @@ document.getElementById('register-btn').addEventListener('click', () => {
                 <option value="ADMIN">ADMIN</option>
             </select>
         `,
-        confirmButtonText: 'Register',
-        preConfirm: () => {
-            const username = document.getElementById('register-username').value;
-            const password = document.getElementById('register-password').value;
-            const email = document.getElementById('register-email').value;
-            const role = document.getElementById('register-role').value;
-            return { username: username, password: password, email: email, role: role };
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(result.value)
-            }).then(handleFetchError)
-              .then(data => {
-                  if (data.message === 'User registered successfully.') {
-                      Swal.fire('Success', data.message, 'success');
-                  } else {
-                      Swal.fire('Error', data.message, 'error');
-                  }
-              }).catch(error => {
-                  Swal.fire('Error', error.message, 'error');
-              });
-        }
-    });
+		confirmButtonText: 'Register',
+		preConfirm: () => {
+			const username = document.getElementById('register-username').value;
+			const password = document.getElementById('register-password').value;
+			const email = document.getElementById('register-email').value;
+			const role = document.getElementById('register-role').value;
+			return { username: username, password: password, email: email, role: role };
+		}
+	}).then((result) => {
+		if (result.isConfirmed) {
+			fetch('/api/auth/register', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(result.value)
+			}).then(handleFetchError)
+				.then(data => {
+					if (data.message === 'User registered successfully.') {
+						Swal.fire('Success', data.message, 'success');
+					} else {
+						Swal.fire('Error', data.message, 'error');
+					}
+				}).catch(error => {
+					Swal.fire('Error', error.message, 'error');
+				});
+		}
+	});
 });
 
 // Função para ordenar produtos

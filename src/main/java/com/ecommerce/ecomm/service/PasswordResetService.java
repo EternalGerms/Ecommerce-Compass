@@ -37,7 +37,7 @@ public class PasswordResetService {
         PasswordResetToken myToken = new PasswordResetToken(token, user);
         passwordResetTokenRepository.save(myToken);
         String resetUrl = token;
-        emailService.sendEmail(user.getEmail(), "Password Reset Request", resetUrl);
+        emailService.sendEmail(user.getEmail(), "Código para alteração de senha", resetUrl);
     }
     
     public void resetPassword(String token, String newPassword) {

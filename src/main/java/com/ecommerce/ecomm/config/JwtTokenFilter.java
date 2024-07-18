@@ -1,12 +1,8 @@
 package com.ecommerce.ecomm.config;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -29,7 +25,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         try {
             if (checkJWTToken(request, response)) {
                 Claims claims = validateToken(request);
-                if (claims.get("roles") != null) {
+                if (claims.getSubject() != null) {
                     setUpSpringAuthentication(claims);
                 } else {
                     SecurityContextHolder.clearContext();
@@ -50,12 +46,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     }
 
     private void setUpSpringAuthentication(Claims claims) {
-        @SuppressWarnings("unchecked")
-        List<String> roles = (List<String>) claims.get("roles");
-        List<GrantedAuthority> authorities = roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                .collect(Collectors.toList());
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(claims.getSubject(), null,
-                authorities);
+                null);
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 

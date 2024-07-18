@@ -22,7 +22,11 @@ public enum ErrorCode {
     INVALID_LOGIN(401, "UNAUTHORIZED", "Login inválido"),
     USERNAME_ALREADY_EXISTS(409, "CONFLICT", "Nome de usuário já existente/utilizado"),
     INVALID_REGISTRATION(400, "BAD_REQUEST", "Registro inválido"),
-    USER_ROLE_NO_PERMISSION(403, "FORBIDDEN", "Usuário com role USER sem permissão para criar um produto");
+    USER_ROLE_NO_PERMISSION(403, "FORBIDDEN", "Usuário com role USER sem permissão para criar um produto"),
+    USER_NOT_AUTHENTICATED(401, "UNAUTHORIZED", "Usuário não autenticado"), // Added line
+    USER_NOT_FOUND(404, "NOT_FOUND", "Usuário não encontrado"), // Added line
+    ROLE_NOT_FOUND(404, "NOT_FOUND", "Role não encontrada"), // Added line
+    TOKEN_EXPIRED(400, "BAD_REQUEST", "Token expirado"); // Added line
 
     private final int code;
     private final String status;

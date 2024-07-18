@@ -2,12 +2,13 @@ package com.ecommerce.ecomm.service;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.ecomm.dto.ProdutoDTO;
 import com.ecommerce.ecomm.entities.Produto;
-import com.ecommerce.ecomm.entities.User;
 import com.ecommerce.ecomm.entities.Venda;
 import com.ecommerce.ecomm.exception.EcommException;
 import com.ecommerce.ecomm.exception.ErrorCode;
@@ -19,20 +20,15 @@ import jakarta.validation.Valid;
 @Service
 public class ProdutoService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ProdutoService.class);
+
     @Autowired
     private ProdutoRepository produtoRepository;
 
     @Autowired
     private VendaRepository vendaRepository;
 
-    @Autowired
-    private PermissionService permissionService; // Corrigido para PermissionService
-
-    public Produto criarProduto(@Valid Produto produto, User currentUser) {
-    	if (!permissionService.checkUserPermissions(currentUser, "CREATE_PRODUCT")) {
-            throw new EcommException(ErrorCode.USER_ROLE_NO_PERMISSION);
-        }
-
+    public Produto criarProduto(@Valid Produto produto) {
         if (produto.getEstoque() < 0) {
             throw new EcommException(ErrorCode.INVALID_PRODUCT_STOCK);
         }
@@ -41,7 +37,9 @@ public class ProdutoService {
             throw new EcommException(ErrorCode.INVALID_PRODUCT_PRICE);
         }
 
-        return produtoRepository.save(produto);
+        Produto produtoSalvo = produtoRepository.save(produto);
+        logger.info("Product created with ID: " + produtoSalvo.getId());
+        return produtoSalvo;
     }
 
     public List<Produto> listarProdutos() {
@@ -52,11 +50,7 @@ public class ProdutoService {
         return produtos;
     }
 
-    public Produto atualizarProduto(Long id, @Valid ProdutoDTO produtoUpdateDTO, User currentUser) {
-        if (!permissionService.checkUserPermissions(currentUser, "UPDATE_PRODUCT")) {
-            throw new EcommException(ErrorCode.USER_ROLE_NO_PERMISSION);
-        }
-
+    public Produto atualizarProduto(Long id, @Valid ProdutoDTO produtoUpdateDTO) {
         Produto produtoExistente = produtoRepository.findById(id)
                 .orElseThrow(() -> new EcommException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -84,33 +78,31 @@ public class ProdutoService {
             produtoExistente.setAtivo(produtoUpdateDTO.isAtivo());
         }
 
-        return produtoRepository.save(produtoExistente);
+        Produto produtoAtualizado = produtoRepository.save(produtoExistente);
+        logger.info("Product updated with ID: " + produtoAtualizado.getId());
+        return produtoAtualizado;
     }
 
-    public void deletarProduto(Long id, User currentUser) {
-        if (!permissionService.checkUserPermissions(currentUser, "DELETE_PRODUCT")) {
-            throw new EcommException(ErrorCode.USER_ROLE_NO_PERMISSION);
-        }
-
+    public void deletarProduto(Long id) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new EcommException(ErrorCode.PRODUCT_NOT_FOUND));
 
         List<Venda> vendas = vendaRepository.findByProdutoId(id);
-        System.out.println("Vendas associadas: " + vendas.size()); // Adicione este log para depuração
+        logger.debug("Vendas associadas: " + vendas.size());
 
         if (produto.isAtivo()) {
             if (vendas.isEmpty()) {
-                System.out.println("Excluindo produto: " + produto.getId()); // Adicione este log para depuração
+                logger.info("Deleting product with ID: " + produto.getId());
                 produtoRepository.delete(produto);
             } else {
-                System.out.println("Inativando produto: " + produto.getId()); // Adicione este log para depuração
+                logger.info("Deactivating product with ID: " + produto.getId());
                 produto.setAtivo(false);
                 produtoRepository.save(produto);
                 throw new EcommException(ErrorCode.PRODUTO_INATIVO);
             }
         } else {
             if (vendas.isEmpty()) {
-                System.out.println("Excluindo produto: " + produto.getId()); // Adicione este log para depuração
+                logger.info("Deleting product with ID: " + produto.getId());
                 produtoRepository.delete(produto);
             } else {
                 throw new EcommException(ErrorCode.PRODUTO_INATIVO);
