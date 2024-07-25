@@ -7,6 +7,7 @@
 	<title>eCommerce API Interface</title>
 	<link rel="stylesheet" href="styles.css" />
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -20,7 +21,6 @@
 		<button id="login-btn">Login</button>
 		<button id="register-btn">Register</button>
 	</header>
-
 
 	<main>
 		<section>
@@ -61,22 +61,20 @@
 			</section>
 
 			<section>
-				<h2>Editar Produto</h2>
-				<form id="editProductForm">
-					<input type="hidden" id="editProductId" />
-					<label for="editProductName">Nome:</label>
-					<input type="text" id="editProductName" required />
-					<label for="editProductStock">Estoque:</label>
-					<input type="number" id="editProductStock" required />
-					<label for="editProductPrice">Preço:</label>
-					<input type="number" id="editProductPrice" step="0.01" required />
-					<label for="editProductActive" style="
-    text-align: center;
-">Ativo:</label>
-					<input type="checkbox" id="editProductActive" />
-					<button type="submit">Atualizar Produto</button>
-				</form>
-				<div id="editProductResult"></div>
+			    <h2>Editar Produto</h2>
+			    <form id="editProductForm">
+			        <input type="hidden" id="editProductId" name="id">
+			        <label for="editProductName">Nome:</label>
+			        <input type="text" id="editProductName" name="nome">
+			        <label for="editProductStock">Estoque:</label>
+			        <input type="number" id="editProductStock" name="estoque">
+			        <label for="editProductPrice">Preço:</label>
+			        <input type="number" id="editProductPrice" name="preco" step="0.01">
+			        <label for="editProductActive">Ativo:</label>
+			        <input type="checkbox" id="editProductActive" name="ativo">
+			        <button type="submit">Atualizar Produto</button>
+			    </form>
+			    <div id="editProductResult"></div>
 			</section>
 		</div>
 
@@ -208,7 +206,6 @@
 	</main>
 
 	<script src="scripts.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>
