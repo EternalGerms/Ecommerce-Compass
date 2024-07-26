@@ -85,4 +85,6 @@ A aplicação estará disponível em `http://localhost:8080`.
 
 ### Diagrama ER
 
-![NO_12i8m38RlVOgym5x0qv1T10-2u5NY6aQXQxOs4MJptQtTYc1F___JvClV9i4eEdf3GPoyu1BPgZ0i1l8xSnZ0sQAl4brsWKSg_XI41ef0INZMBUjO7vvWYjHp2OxCdZ00YdkoUPkAkL6m-0-fUjfkk9Vi1veLyx15I_lN7ds7Gc1Hi2py0cg1TMqQNdRG0IPEIPrfiyrjFm00](https://github.com/EternalGerms/Ecommerce-Compass/assets/119995136/d1a68c12-75d6-42e4-af43-5fbc33e4c6c3)
+![VPB1JiCm38RlVGghLzGNw6b2ko1nG6DmHTvYZOWqtX87gDQzEswXQwEfN2BvZ_tz_fkkec2GrBY2l5XfuILIW7C1S0VMrF38_g15LUcHzCfZGpKyIx23ViGOlpYOcKGDMdUjByK8th2Z1V0SgXFpLOQfvNNUPcBGrgcUC4-1JH9UykOyKA0zrx3cj7EaDKNXKzAE1ozqeA0IYltKbdjMF_](https://github.com/user-attachments/assets/4e4b1c6d-cbe5-411a-95f0-49ad5c41531b)
+
+
